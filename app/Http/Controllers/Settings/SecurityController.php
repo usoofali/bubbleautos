@@ -19,6 +19,7 @@ class SecurityController extends Controller
     {
         $props = [
             'passwordRules' => Password::defaults()->toPasswordRulesString(),
+            'isAdmin' => $request->user()->isAdmin(),
         ];
 
         return Inertia::render('settings/Security', $props);
@@ -29,6 +30,12 @@ class SecurityController extends Controller
      */
     public function update(PasswordUpdateRequest $request): RedirectResponse
     {
+        if (! $request->user()->isAdmin()) {
+            return back()->withErrors([
+                'current_password' => 'Staff passwords can only be modified by a System Administrator.',
+            ]);
+        }
+
         $request->user()->update([
             'password' => $request->password,
         ]);

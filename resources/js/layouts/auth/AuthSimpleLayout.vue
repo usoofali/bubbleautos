@@ -1,41 +1,76 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
-import AppLogoIcon from '@/components/AppLogoIcon.vue';
+import { Sun, Moon, Monitor } from '@lucide/vue';
+import AppLogo from '@/components/AppLogo.vue';
+import { useAppearance } from '@/composables/useAppearance';
 import { home } from '@/routes';
 
 defineProps<{
     title?: string;
     description?: string;
 }>();
+
+const { appearance, updateAppearance, resolvedAppearance } = useAppearance();
+
+function toggleNextTheme() {
+    if (appearance.value === 'system') {
+        updateAppearance('light');
+    } else if (appearance.value === 'light') {
+        updateAppearance('dark');
+    } else {
+        updateAppearance('system');
+    }
+}
 </script>
 
 <template>
     <div
-        class="flex min-h-svh flex-col items-center justify-center gap-6 bg-background p-6 md:p-10"
+        class="relative flex min-h-svh flex-col items-center justify-center overflow-hidden bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 p-6 md:p-10 transition-colors duration-300 selection:bg-blue-600 selection:text-white"
     >
-        <div class="w-full max-w-sm">
-            <div class="flex flex-col gap-8">
-                <div class="flex flex-col items-center gap-4">
+        <!-- Theme Toggle Floating Switch -->
+        <div class="absolute top-5 right-5 z-20">
+            <button
+                @click="toggleNextTheme()"
+                type="button"
+                class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all shadow-xs"
+                :title="`Current theme: ${appearance} (${resolvedAppearance}). Click to toggle.`"
+            >
+                <Sun v-if="resolvedAppearance === 'light'" class="w-3.5 h-3.5 text-amber-500" />
+                <Moon v-else class="w-3.5 h-3.5 text-blue-400" />
+                <span class="capitalize">{{ appearance }}</span>
+            </button>
+        </div>
+
+        <!-- Ambient Glowing Background Elements -->
+        <div class="absolute -top-40 -left-40 w-96 h-96 bg-blue-500/10 dark:bg-blue-600/15 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -bottom-40 -right-40 w-96 h-96 bg-indigo-500/10 dark:bg-indigo-600/15 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute inset-0 bg-[linear-gradient(to_right,#cbd5e120_1px,transparent_1px),linear-gradient(to_bottom,#cbd5e120_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#1e293b20_1px,transparent_1px),linear-gradient(to_bottom,#1e293b20_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] pointer-events-none"></div>
+
+        <div class="relative z-10 w-full max-w-md">
+            <div class="flex flex-col gap-6 bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl p-8 md:p-10 rounded-3xl shadow-xl dark:shadow-2xl dark:shadow-blue-950/40 border border-slate-200/80 dark:border-slate-800/80 transition-all duration-300">
+                <div class="flex flex-col items-center gap-4 text-center">
                     <Link
                         :href="home()"
-                        class="flex flex-col items-center gap-2 font-medium"
+                        class="flex flex-col items-center gap-2 group focus:outline-hidden"
                     >
-                        <div
-                            class="mb-1 flex h-9 w-9 items-center justify-center rounded-md"
-                        >
-                            <AppLogoIcon
-                                class="size-9 fill-current text-[var(--foreground)] dark:text-white"
-                            />
+                        <div class="p-2.5 rounded-2xl bg-slate-100/80 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 group-hover:border-blue-500/50 transition-colors shadow-inner">
+                            <AppLogo size="lg" :show-subtext="true" />
                         </div>
-                        <span class="sr-only">{{ title }}</span>
                     </Link>
-                    <div class="space-y-2 text-center">
-                        <h1 class="text-xl font-medium">{{ title }}</h1>
-                        <p class="text-center text-sm text-muted-foreground">
+                    
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800/40 text-blue-700 dark:text-blue-400 text-[11px] font-semibold uppercase tracking-wider mt-1">
+                        <span class="w-1.5 h-1.5 rounded-full bg-blue-500 dark:bg-blue-400 animate-pulse"></span>
+                        <span>Secure Operations Access</span>
+                    </div>
+
+                    <div class="space-y-1.5 mt-1">
+                        <h1 class="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">{{ title }}</h1>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 max-w-xs mx-auto leading-relaxed">
                             {{ description }}
                         </p>
                     </div>
                 </div>
+
                 <slot />
             </div>
         </div>

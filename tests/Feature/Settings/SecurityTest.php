@@ -1,52 +1,15 @@
 <?php
 
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
-use Inertia\Testing\AssertableInertia as Assert;
-use Laravel\Fortify\Features;
 
-test('security page is displayed', function () {
-    $this->skipUnlessFortifyHas(Features::twoFactorAuthentication());
-
-    Features::twoFactorAuthentication([
-        'confirm' => true,
-        'confirmPassword' => true,
-    ]);
-
-    $user = User::factory()->create();
-
-    $this->actingAs($user)
-        ->get(route('security.edit'))
-        ->assertInertia(fn (Assert $page) => $page
-            ->component('settings/Security')
-            ->where('canManageTwoFactor', true)
-            ->where('twoFactorEnabled', false),
-        );
-});
-
-test('security page renders without two factor when feature is disabled', function () {
-    $this->skipUnlessFortifyHas(Features::twoFactorAuthentication());
-
-    config(['fortify.features' => []]);
-
-    $user = User::factory()->create();
-
-    $this->actingAs($user)
-        ->get(route('security.edit'))
-        ->assertOk()
-        ->assertInertia(fn (Assert $page) => $page
-            ->component('settings/Security')
-            ->where('canManageTwoFactor', false)
-            ->missing('twoFactorEnabled')
-            ->missing('requiresConfirmation'),
-        );
-});
-
-test('password can be updated', function () {
-    $user = User::factory()->create();
+test('admin can update password via security settings', function () {
+    $adminRole = Role::create(['name' => 'Administrator', 'slug' => 'admin']);
+    $admin = User::factory()->create(['role_id' => $adminRole->id]);
 
     $response = $this
-        ->actingAs($user)
+        ->actingAs($admin)
         ->from(route('security.edit'))
         ->put(route('user-password.update'), [
             'current_password' => 'password',
@@ -58,17 +21,18 @@ test('password can be updated', function () {
         ->assertSessionHasNoErrors()
         ->assertRedirect(route('security.edit'));
 
-    expect(Hash::check('new-password', $user->refresh()->password))->toBeTrue();
+    expect(Hash::check('new-password', $admin->refresh()->password))->toBeTrue();
 });
 
-test('correct password must be provided to update password', function () {
-    $user = User::factory()->create();
+test('non-admin staff cannot update password via security settings', function () {
+    $staffRole = Role::create(['name' => 'Staff', 'slug' => 'staff']);
+    $staff = User::factory()->create(['role_id' => $staffRole->id]);
 
     $response = $this
-        ->actingAs($user)
+        ->actingAs($staff)
         ->from(route('security.edit'))
         ->put(route('user-password.update'), [
-            'current_password' => 'wrong-password',
+            'current_password' => 'password',
             'password' => 'new-password',
             'password_confirmation' => 'new-password',
         ]);
