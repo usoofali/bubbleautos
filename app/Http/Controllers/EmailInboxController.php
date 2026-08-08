@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Enums\EmailStatus;
+use App\Enums\ShipmentStatus;
 use App\Models\Email;
 use App\Models\EmailAttachment;
 use App\Models\Order;
 use App\Services\EmailFetchService;
 use App\Services\EmailProcessingService;
+use App\Services\OrderService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -45,6 +47,10 @@ class EmailInboxController extends Controller
         return Inertia::render('Emails/Index', [
             'emails' => $emails,
             'orders' => $orders,
+            'statusOptions' => array_map(fn ($s) => [
+                'value' => $s->value,
+                'label' => $s->label(),
+            ], ShipmentStatus::cases()),
             'filters' => [
                 'status' => $status,
                 'search' => $search,
@@ -56,6 +62,7 @@ class EmailInboxController extends Controller
     {
         $validated = $request->validate([
             'order_id' => 'required|exists:orders,id',
+            'status' => 'nullable|string',
         ]);
 
         $order = Order::findOrFail($validated['order_id']);
@@ -63,6 +70,14 @@ class EmailInboxController extends Controller
         $this->authorize('update', $order);
 
         $this->emailProcessingService->linkToOrder($email, $order);
+
+        if (! empty($validated['status'])) {
+            app(OrderService::class)->updateStatus(
+                $order,
+                $validated['status'],
+                "Status updated during email linking ('{$email->subject}')."
+            );
+        }
 
         return back()->with('success', "Email linked to Order {$order->order_number} successfully.");
     }

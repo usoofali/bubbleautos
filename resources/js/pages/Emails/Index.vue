@@ -16,6 +16,7 @@ import { Mail, Link as LinkIcon, Unlink, Paperclip, CheckCircle2, Clock, Eye, Do
 interface Props {
     emails: any;
     orders: any[];
+    statusOptions?: Array<{ value: string; label: string }>;
     filters: { status: string; search: string };
 }
 
@@ -45,6 +46,7 @@ const viewingEmail = ref<any>(null);
 const linkingEmail = ref<any>(null);
 const linkForm = useForm({
     order_id: '',
+    status: '',
 });
 
 const submitLinkEmail = () => {
@@ -351,6 +353,13 @@ const triggerImapFetch = () => {
                         {{ o.order_number }} - {{ o.vin }} ({{ o.year }} {{ o.make }} {{ o.model }})
                     </option>
                 </AppSelect>
+            </AppFormField>
+            <AppFormField label="Update Shipment Status (Optional)" :error="linkForm.errors.status">
+                <AppSelect
+                    v-model="linkForm.status"
+                    :options="statusOptions || []"
+                    placeholder="Leave unchanged or pick new status..."
+                />
             </AppFormField>
             <div class="flex justify-end gap-3 pt-2">
                 <AppButton variant="outline" @click="linkingEmail = null">Cancel</AppButton>

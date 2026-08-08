@@ -190,18 +190,26 @@ const submitEditOrder = () => {
     });
 };
 
-// Status Update Form
-const showStatusModal = ref(false);
-const statusForm = useForm({
-    status: props.order.status,
+// Tracking & Delivery ETA Update Form
+const showTrackingModal = ref(false);
+const trackingForm = useForm({
+    expected_arrival: props.order.expected_arrival || '',
+    status: '',
     notes: '',
 });
 
-const submitStatusUpdate = () => {
-    statusForm.patch(`/orders/${props.order.id}/status`, {
+const openTrackingModal = () => {
+    trackingForm.expected_arrival = props.order.expected_arrival || '';
+    trackingForm.status = '';
+    trackingForm.notes = '';
+    showTrackingModal.value = true;
+};
+
+const submitTrackingUpdate = () => {
+    trackingForm.patch(`/orders/${props.order.id}/tracking`, {
         onSuccess: () => {
-            showStatusModal.value = false;
-            showToast.success('Shipment status updated!');
+            showTrackingModal.value = false;
+            showToast.success('Tracking information and expected arrival saved successfully.');
         },
     });
 };
@@ -319,6 +327,7 @@ const documentForm = useForm({
     document_type: 'bill_of_lading',
     content: '',
     file: null as File | null,
+    status: '',
 });
 
 const handleFileSelected = (file: File | null) => {
@@ -551,10 +560,6 @@ const formatFileSize = (bytes: number | null | undefined) => {
                         <SquarePen class="w-4 h-4" /> Edit
                     </AppButton>
 
-                    <AppButton variant="amber" size="sm" @click="showStatusModal = true">
-                        <Truck class="w-4 h-4" /> Status
-                    </AppButton>
-
                     <AppButton variant="primary" size="sm" @click="showPaymentModal = true" class="col-span-2 sm:col-span-1">
                         <DollarSign class="w-4 h-4" /> Record Payment
                     </AppButton>
@@ -659,12 +664,17 @@ const formatFileSize = (bytes: number | null | undefined) => {
                                 <AppBadge :status="order.status" size="md" />
                             </div>
                         </div>
-                        <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700/60">
-                            <span class="text-xs font-semibold text-slate-400 uppercase">Expected Arrival Date</span>
-                            <p class="text-base font-bold text-slate-900 dark:text-white mt-1 flex items-center gap-2">
-                                <Calendar class="w-4 h-4 text-blue-500" />
-                                {{ formatDateOnly(order.expected_arrival) }}
-                            </p>
+                        <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700/60 flex items-center justify-between flex-wrap gap-2">
+                            <div>
+                                <span class="text-xs font-semibold text-slate-400 uppercase">Expected Arrival Date</span>
+                                <p class="text-base font-bold text-slate-900 dark:text-white mt-1 flex items-center gap-2">
+                                    <Calendar class="w-4 h-4 text-blue-500" />
+                                    {{ formatDateOnly(order.expected_arrival) }}
+                                </p>
+                            </div>
+                            <AppButton size="sm" variant="secondary" @click="openTrackingModal">
+                                <Calendar class="w-3.5 h-3.5" /> Update Tracking & Status
+                            </AppButton>
                         </div>
                     </div>
                 </AppCard>
@@ -1068,23 +1078,29 @@ const formatFileSize = (bytes: number | null | undefined) => {
         </div>
     </div>
 
-    <!-- Update Shipment Status Modal -->
-    <AppModal :show="showStatusModal" title="Update Shipment Status" @close="showStatusModal = false">
-        <form @submit.prevent="submitStatusUpdate" class="space-y-4">
-            <AppFormField label="New Status" required :error="statusForm.errors.status">
+    <!-- Update Tracking & Expected Delivery Modal -->
+    <AppModal :show="showTrackingModal" title="Update Tracking & Expected Delivery" @close="showTrackingModal = false">
+        <form @submit.prevent="submitTrackingUpdate" class="space-y-4">
+            <AppFormField label="Expected Delivery Date" :error="trackingForm.errors.expected_arrival">
+                <AppDatePicker v-model="trackingForm.expected_arrival" />
+            </AppFormField>
+            
+            <AppFormField label="Update Shipment Status (Optional)" :error="trackingForm.errors.status">
                 <AppSelect
-                    v-model="statusForm.status"
+                    v-model="trackingForm.status"
                     :options="statusOptions"
-                    placeholder="Select new status..."
+                    placeholder="Leave unchanged or pick new status..."
                 />
             </AppFormField>
-            <AppFormField label="Internal Notes (Optional)" :error="statusForm.errors.notes">
-                <AppTextarea v-model="statusForm.notes" placeholder="Add notes about this status change..." :rows="3" />
+
+            <AppFormField label="Tracking Log / Operational Notes (Optional)" :error="trackingForm.errors.notes">
+                <AppTextarea v-model="trackingForm.notes" placeholder="Add tracking details or notes about status change..." :rows="3" />
             </AppFormField>
+
             <div class="flex justify-end gap-3 pt-2">
-                <AppButton variant="outline" @click="showStatusModal = false">Cancel</AppButton>
-                <AppButton type="submit" variant="amber" :loading="statusForm.processing">
-                    <Truck class="w-4 h-4" /> Update Status
+                <AppButton variant="outline" @click="showTrackingModal = false">Cancel</AppButton>
+                <AppButton type="submit" variant="primary" :loading="trackingForm.processing">
+                    Save Tracking & Status
                 </AppButton>
             </div>
         </form>
@@ -1261,6 +1277,14 @@ const formatFileSize = (bytes: number | null | undefined) => {
                     @file-selected="handleFileSelected"
                     @file-removed="handleFileSelected(null)"
                     @change="handleFileSelected"
+                />
+            </AppFormField>
+
+            <AppFormField label="Update Shipment Status (Optional)" :error="documentForm.errors.status">
+                <AppSelect
+                    v-model="documentForm.status"
+                    :options="statusOptions"
+                    placeholder="Leave unchanged or pick new status..."
                 />
             </AppFormField>
 

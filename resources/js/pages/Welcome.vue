@@ -123,10 +123,23 @@ function triggerDemoSearch(vinToSearch?: string) {
     <Head title="Bubbles Autos - Vehicle Shipping & Operations Management Platform" />
 
     <div class="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col selection:bg-blue-600 selection:text-white font-sans relative overflow-hidden transition-colors duration-300">
+        <!-- Textured Grid & Matrix Pattern -->
+        <div class="absolute inset-0 bg-[radial-gradient(#94a3b8_1px,transparent_1px)] dark:bg-[radial-gradient(#334155_1px,transparent_1px)] [background-size:24px_24px] opacity-40 dark:opacity-30 pointer-events-none z-0"></div>
+
         <!-- Ambient Glowing Background Lights -->
-        <div class="absolute -top-40 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-blue-500/10 dark:bg-blue-600/10 rounded-full blur-[140px] pointer-events-none"></div>
-        <div class="absolute top-96 -right-20 w-[450px] h-[450px] bg-indigo-500/10 dark:bg-indigo-600/10 rounded-full blur-[120px] pointer-events-none"></div>
-        <div class="absolute inset-0 bg-[linear-gradient(to_right,#cbd5e120_1px,transparent_1px),linear-gradient(to_bottom,#cbd5e120_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#1e293b10_1px,transparent_1px),linear-gradient(to_bottom,#1e293b10_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none"></div>
+        <div class="absolute -top-40 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-blue-500/10 dark:bg-blue-600/10 rounded-full blur-[140px] pointer-events-none z-0"></div>
+        <div class="absolute top-96 -right-20 w-[450px] h-[450px] bg-indigo-500/10 dark:bg-indigo-600/10 rounded-full blur-[120px] pointer-events-none z-0"></div>
+        <div class="absolute inset-0 bg-[linear-gradient(to_right,#cbd5e120_1px,transparent_1px),linear-gradient(to_bottom,#cbd5e120_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#1e293b10_1px,transparent_1px),linear-gradient(to_bottom,#1e293b10_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none z-0"></div>
+
+        <!-- Huge Subtle Background Watermark Graphic & Brand Text -->
+        <div class="absolute inset-0 flex items-center justify-center overflow-hidden pointer-events-none select-none z-0">
+            <div class="w-[700px] h-[700px] lg:w-[850px] lg:h-[850px] rounded-full border border-blue-500/10 dark:border-blue-400/10 flex items-center justify-center relative">
+                <img src="/logo.jpeg" alt="" class="w-[400px] h-[400px] lg:w-[500px] lg:h-[500px] object-contain rounded-full opacity-[0.04] dark:opacity-[0.07] grayscale blur-[1px]" />
+            </div>
+            <div class="absolute text-[120px] sm:text-[180px] lg:text-[220px] font-black uppercase tracking-[0.25em] text-slate-900/[0.03] dark:text-white/[0.04] whitespace-nowrap -rotate-6 select-none">
+                BUBBLES AUTOS
+            </div>
+        </div>
 
         <!-- Navigation Header -->
         <header class="border-b border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl sticky top-0 z-50 transition-colors">

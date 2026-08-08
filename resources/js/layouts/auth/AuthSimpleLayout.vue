@@ -41,10 +41,23 @@ function toggleNextTheme() {
             </button>
         </div>
 
+        <!-- Textured Grid Pattern Layer -->
+        <div class="absolute inset-0 bg-[radial-gradient(#94a3b8_1px,transparent_1px)] dark:bg-[radial-gradient(#334155_1px,transparent_1px)] [background-size:24px_24px] opacity-40 dark:opacity-30 pointer-events-none"></div>
+
         <!-- Ambient Glowing Background Elements -->
         <div class="absolute -top-40 -left-40 w-96 h-96 bg-blue-500/10 dark:bg-blue-600/15 rounded-full blur-3xl pointer-events-none"></div>
         <div class="absolute -bottom-40 -right-40 w-96 h-96 bg-indigo-500/10 dark:bg-indigo-600/15 rounded-full blur-3xl pointer-events-none"></div>
         <div class="absolute inset-0 bg-[linear-gradient(to_right,#cbd5e120_1px,transparent_1px),linear-gradient(to_bottom,#cbd5e120_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#1e293b20_1px,transparent_1px),linear-gradient(to_bottom,#1e293b20_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] pointer-events-none"></div>
+
+        <!-- Subtle Watermark Background Graphics -->
+        <div class="absolute inset-0 flex items-center justify-center overflow-hidden pointer-events-none select-none">
+            <div class="w-[500px] h-[500px] rounded-full border border-blue-500/10 dark:border-blue-400/10 flex items-center justify-center relative">
+                <img src="/logo.jpeg" alt="" class="w-72 h-72 object-contain rounded-full opacity-5 dark:opacity-10 grayscale blur-[1px]" />
+            </div>
+            <div class="absolute text-[80px] sm:text-[110px] font-black uppercase tracking-[0.2em] text-slate-900/[0.03] dark:text-white/[0.04] whitespace-nowrap -rotate-12">
+                BUBBLES AUTOS
+            </div>
+        </div>
 
         <div class="relative z-10 w-full max-w-md">
             <div class="flex flex-col gap-6 bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl p-8 md:p-10 rounded-3xl shadow-xl dark:shadow-2xl dark:shadow-blue-950/40 border border-slate-200/80 dark:border-slate-800/80 transition-all duration-300">

@@ -177,6 +177,27 @@ class OrderController extends Controller
         return back()->with('success', 'Shipment status updated successfully.');
     }
 
+    public function updateTracking(Request $request, Order $order): RedirectResponse
+    {
+        $this->authorize('update', $order);
+
+        $validated = $request->validate([
+            'expected_arrival' => 'nullable|date',
+            'status' => 'nullable|string',
+            'notes' => 'nullable|string|max:500',
+        ]);
+
+        if (array_key_exists('expected_arrival', $validated)) {
+            $order->update(['expected_arrival' => $validated['expected_arrival']]);
+        }
+
+        if (! empty($validated['status'])) {
+            $this->orderService->updateStatus($order, $validated['status'], $validated['notes'] ?? 'Status updated during tracking update.');
+        }
+
+        return back()->with('success', 'Tracking information updated successfully.');
+    }
+
     public function syncVehicleApi(Order $order, VehicleApiService $vehicleApiService): RedirectResponse
     {
         $this->authorize('update', $order);

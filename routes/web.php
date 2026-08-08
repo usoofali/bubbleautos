@@ -30,6 +30,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
     Route::patch('/orders/{order}', [OrderController::class, 'update'])->name('orders.update');
     Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.update-status');
+    Route::patch('/orders/{order}/tracking', [OrderController::class, 'updateTracking'])->name('orders.update-tracking');
     Route::post('/orders/{order}/sync-vehicle-api', [OrderController::class, 'syncVehicleApi'])->name('orders.sync-vehicle');
     Route::get('/api/vehicles/{vin}/lookup', [OrderController::class, 'lookupVin'])->name('orders.lookup-vin');
     Route::delete('/orders/{order}', [OrderController::class, 'destroy'])->name('orders.destroy');

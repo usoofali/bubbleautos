@@ -7,6 +7,7 @@ use App\Enums\TimelineEventType;
 use App\Models\Document;
 use App\Models\Order;
 use App\Services\ActivityLogService;
+use App\Services\OrderService;
 use App\Services\TimelineService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -24,6 +25,7 @@ class DocumentController extends Controller
             'title' => 'nullable|string|max:255',
             'file' => 'nullable|file|max:15360', // 15MB max
             'content' => 'nullable|string|max:10000',
+            'status' => 'nullable|string',
         ]);
 
         if (empty($request->file('file')) && empty($validated['content'])) {
@@ -60,6 +62,14 @@ class DocumentController extends Controller
             'uploaded_by' => $request->user()->id,
             'uploaded_at' => now(),
         ]);
+
+        if (! empty($validated['status'])) {
+            app(OrderService::class)->updateStatus(
+                $order,
+                $validated['status'],
+                "Status updated during document upload ('{$title}')."
+            );
+        }
 
         $typeLabel = $doc->document_type instanceof DocumentType ? $doc->document_type->label() : $doc->title;
 
