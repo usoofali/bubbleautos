@@ -32,7 +32,7 @@ class OrderService
                 'paid' => 0,
                 'balance' => 0,
                 'currency' => $currency,
-                'status' => 'unpaid',
+                'status' => \App\Enums\InvoiceStatus::PENDING,
             ]);
 
             TimelineService::log(

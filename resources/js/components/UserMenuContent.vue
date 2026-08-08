@@ -11,16 +11,26 @@ import UserInfo from '@/components/UserInfo.vue';
 import { logout } from '@/routes';
 import { edit } from '@/routes/profile';
 import type { User } from '@/types';
+import { useSidebar } from '@/components/ui/sidebar';
 
 type Props = {
     user: User;
 };
 
-const handleLogout = () => {
-    router.flushAll();
+defineProps<Props>();
+
+const { isMobile, setOpenMobile } = useSidebar();
+
+const handleNavClick = () => {
+    if (isMobile.value) {
+        setOpenMobile(false);
+    }
 };
 
-defineProps<Props>();
+const handleLogout = () => {
+    handleNavClick();
+    router.flushAll();
+};
 </script>
 
 <template>
@@ -32,7 +42,7 @@ defineProps<Props>();
     <DropdownMenuSeparator />
     <DropdownMenuGroup>
         <DropdownMenuItem :as-child="true">
-            <Link class="block w-full cursor-pointer" :href="edit()" prefetch>
+            <Link class="block w-full cursor-pointer" :href="edit()" @click="handleNavClick" prefetch>
                 <Settings class="mr-2 h-4 w-4" />
                 Settings
             </Link>

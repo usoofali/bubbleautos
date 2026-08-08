@@ -101,7 +101,7 @@ const confirmDeleteOrder = () => {
         </AppPageHeader>
 
         <!-- Search & Filters Bar (Mobile-First Layout) -->
-        <AppCard no-padding class="p-4 shadow-xs border-slate-200/80 dark:border-slate-800">
+        <AppCard no-padding class="p-4 sm:p-5 shadow-xs border-slate-200/80 dark:border-slate-800/80">
             <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 justify-between">
                 <div class="relative w-full sm:w-80">
                     <Search class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -110,7 +110,7 @@ const confirmDeleteOrder = () => {
                         v-model="searchQuery"
                         @keyup.enter="filterOrders"
                         placeholder="Search VIN, Order #, Customer..."
-                        class="w-full pl-10 pr-9 py-2.5 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-blue-500/20 outline-hidden"
+                        class="w-full pl-10 pr-9 py-2.5 text-sm rounded-xl border border-slate-300 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-hidden font-medium transition-all"
                     />
                     <button
                         v-if="searchQuery"
@@ -120,12 +120,12 @@ const confirmDeleteOrder = () => {
                         <X class="w-3.5 h-3.5" />
                     </button>
                 </div>
-                <div class="flex items-center gap-2 w-full sm:w-auto">
-                    <div class="relative flex-1 sm:w-56">
+                <div class="flex items-center gap-2.5 w-full sm:w-auto">
+                    <div class="relative flex-1 sm:w-60">
                         <select
                             v-model="selectedStatus"
                             @change="filterOrders"
-                            class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-blue-500/20 outline-hidden font-medium"
+                            class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-hidden font-semibold transition-all"
                         >
                             <option value="">All Shipment Statuses</option>
                             <option v-for="opt in statusOptions" :key="opt.value" :value="opt.value">
@@ -133,7 +133,7 @@ const confirmDeleteOrder = () => {
                             </option>
                         </select>
                     </div>
-                    <AppButton variant="secondary" size="md" @click="filterOrders" class="shrink-0">
+                    <AppButton variant="secondary" size="md" @click="filterOrders" class="shrink-0 rounded-xl font-bold">
                         <Filter class="w-4 h-4" /> Filter
                     </AppButton>
                 </div>
@@ -144,8 +144,8 @@ const confirmDeleteOrder = () => {
         <AppTable
             :columns="[
                 { key: 'order_number', label: 'Order #' },
-                { key: 'vin', label: 'VIN / Vehicle' },
-                { key: 'customer', label: 'Customer' },
+                { key: 'vin', label: 'VIN / Vehicle Specs' },
+                { key: 'customer', label: 'Customer Details' },
                 { key: 'destination', label: 'Destination / Line' },
                 { key: 'status', label: 'Status' },
                 { key: 'actions', label: 'Actions', align: 'right' },
@@ -155,24 +155,24 @@ const confirmDeleteOrder = () => {
             empty-description="Register a new order or adjust your search filters."
         >
             <template #rows="{ items }">
-                <tr v-for="ord in items" :key="ord.id" class="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
+                <tr v-for="ord in items" :key="ord.id" class="hover:bg-blue-50/40 dark:hover:bg-blue-950/30 transition-colors">
                     <td class="px-6 py-4 font-black text-blue-600 dark:text-blue-400">
                         <Link :href="`/orders/${ord.id}`" class="hover:underline">{{ ord.order_number }}</Link>
                     </td>
                     <td class="px-6 py-4">
-                        <div class="font-mono text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wide">{{ ord.vin }}</div>
-                        <div class="text-xs text-slate-400">
+                        <div class="font-mono text-xs font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wide">{{ ord.vin }}</div>
+                        <div class="text-xs text-slate-400 font-medium">
                             <span v-if="ord.make || ord.model">{{ ord.year ? ord.year + ' ' : '' }}{{ ord.make }} {{ ord.model }}</span>
                             <span v-else class="italic text-slate-400">Pending API Lookup</span>
                         </div>
                     </td>
                     <td class="px-6 py-4">
-                        <div class="font-bold text-slate-900 dark:text-white text-xs">{{ ord.customer?.name || 'N/A' }}</div>
+                        <div class="font-extrabold text-slate-900 dark:text-white text-xs">{{ ord.customer?.name || 'N/A' }}</div>
                         <div class="text-xs text-slate-400 font-mono">{{ ord.customer?.phone }}</div>
                     </td>
                     <td class="px-6 py-4">
                         <div class="text-xs font-bold text-slate-700 dark:text-slate-300">{{ ord.destination || 'Pending Sync' }}</div>
-                        <div class="text-xs text-slate-400">{{ ord.shipping_line || 'Pending Line' }}</div>
+                        <div class="text-xs text-slate-400 font-medium">{{ ord.shipping_line || 'Pending Line' }}</div>
                     </td>
                     <td class="px-6 py-4">
                         <AppBadge :status="ord.status" size="sm" />
@@ -181,14 +181,15 @@ const confirmDeleteOrder = () => {
                         <div class="flex items-center justify-end gap-2">
                             <Link
                                 :href="`/orders/${ord.id}`"
-                                class="px-3 py-1.5 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-950/40 dark:text-blue-400 dark:hover:bg-blue-900/60 font-bold text-xs transition-colors flex items-center gap-1 shrink-0"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-extrabold text-xs bg-blue-600 hover:bg-blue-500 text-white shadow-xs active:scale-95 transition-all shrink-0"
                             >
-                                Workspace <ArrowRight class="w-3.5 h-3.5" />
+                                <span>Workspace</span>
+                                <ArrowRight class="w-3.5 h-3.5" />
                             </Link>
                             <button
                                 v-if="$page.props.auth.user.is_admin"
                                 @click="deletingOrder = ord"
-                                class="p-1.5 text-slate-400 hover:text-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors"
+                                class="p-1.5 text-slate-400 hover:text-red-600 rounded-xl hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors"
                                 title="Delete Order"
                             >
                                 <Trash2 class="w-4 h-4" />

@@ -108,33 +108,33 @@ const submitEmail = () => {
     <div class="space-y-6">
         <AppPageHeader title="System & Website Settings" description="Configure application preferences, order prefixes, currency formats, public website CMS, and incoming email credentials" />
 
-        <!-- Tabs -->
-        <div class="flex items-center gap-2 border-b border-slate-200 dark:border-slate-700 pb-2 flex-wrap">
+        <!-- Navigation Tabs (Glass Bar) -->
+        <div class="p-1.5 rounded-2xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/80 dark:border-slate-800/80 shadow-xs flex items-center gap-1.5 overflow-x-auto no-scrollbar">
             <button
                 @click="activeTab = 'general'"
-                class="px-4 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer flex items-center gap-2"
-                :class="activeTab === 'general' ? 'bg-blue-600 text-white shadow-xs' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200'"
+                class="px-4 py-2.5 rounded-xl font-extrabold text-xs transition-all duration-150 flex items-center gap-2 cursor-pointer shrink-0"
+                :class="activeTab === 'general' ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60'"
             >
                 <Settings class="w-4 h-4" /> General Settings
             </button>
             <button
                 @click="activeTab = 'business'"
-                class="px-4 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer flex items-center gap-2"
-                :class="activeTab === 'business' ? 'bg-blue-600 text-white shadow-xs' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200'"
+                class="px-4 py-2.5 rounded-xl font-extrabold text-xs transition-all duration-150 flex items-center gap-2 cursor-pointer shrink-0"
+                :class="activeTab === 'business' ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60'"
             >
                 <Briefcase class="w-4 h-4" /> Business & Order Prefixes
             </button>
             <button
                 @click="activeTab = 'email'"
-                class="px-4 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer flex items-center gap-2"
-                :class="activeTab === 'email' ? 'bg-blue-600 text-white shadow-xs' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200'"
+                class="px-4 py-2.5 rounded-xl font-extrabold text-xs transition-all duration-150 flex items-center gap-2 cursor-pointer shrink-0"
+                :class="activeTab === 'email' ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60'"
             >
                 <Mail class="w-4 h-4" /> Shipping Email Integration
             </button>
             <button
                 @click="activeTab = 'website'"
-                class="px-4 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer flex items-center gap-2"
-                :class="activeTab === 'website' ? 'bg-blue-600 text-white shadow-xs' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200'"
+                class="px-4 py-2.5 rounded-xl font-extrabold text-xs transition-all duration-150 flex items-center gap-2 cursor-pointer shrink-0"
+                :class="activeTab === 'website' ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60'"
             >
                 <Globe class="w-4 h-4" /> Landing Page CMS
             </button>

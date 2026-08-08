@@ -504,7 +504,8 @@ const formatFileSize = (bytes: number | null | undefined) => {
 
     <div class="space-y-6">
         <!-- Order Header Banner (Mobile First) -->
-        <div class="p-5 sm:p-6 rounded-2xl bg-slate-900 text-white shadow-xl relative overflow-hidden">
+        <div class="p-6 sm:p-8 rounded-3xl bg-slate-900/95 dark:bg-slate-950/90 backdrop-blur-xl text-white shadow-xl dark:shadow-2xl dark:shadow-blue-950/40 border border-slate-800/80 relative overflow-hidden">
+            <div class="absolute -top-20 -right-20 w-80 h-80 bg-blue-600/15 rounded-full blur-3xl pointer-events-none"></div>
             <div class="absolute -right-10 -bottom-10 opacity-10 pointer-events-none">
                 <Car class="w-64 h-64 text-white" />
             </div>
@@ -512,7 +513,7 @@ const formatFileSize = (bytes: number | null | undefined) => {
             <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-5">
                 <div class="space-y-2">
                     <div class="flex items-center gap-2.5 flex-wrap">
-                        <span class="px-3 py-1 rounded-full bg-blue-600 text-white font-extrabold text-xs tracking-wider shadow-xs">
+                        <span class="px-3 py-1 rounded-full bg-blue-600 text-white font-extrabold text-xs tracking-wider shadow-md shadow-blue-600/30">
                             {{ order.order_number }}
                         </span>
                         <AppBadge :status="order.status" size="md" />
@@ -525,13 +526,13 @@ const formatFileSize = (bytes: number | null | undefined) => {
 
                     <!-- VIN Services & Quick Copy Bar -->
                     <div class="flex items-center gap-2 pt-1 flex-wrap">
-                        <div class="flex items-center gap-2 font-mono text-xs sm:text-sm bg-slate-800/90 px-3 py-1.5 rounded-xl border border-slate-700/80 shadow-xs">
+                        <div class="flex items-center gap-2 font-mono text-xs sm:text-sm bg-slate-900/90 px-3.5 py-1.5 rounded-xl border border-slate-800 shadow-xs">
                             <ShieldCheck class="w-4 h-4 text-emerald-400 shrink-0" />
                             <span class="text-slate-400">VIN:</span>
                             <span class="font-bold text-blue-400 tracking-wider font-mono">{{ order.vin }}</span>
                             <button
                                 @click="copyVin"
-                                class="ml-2 text-slate-400 hover:text-white transition-colors p-1"
+                                class="ml-2 text-slate-400 hover:text-white transition-colors p-1 rounded-lg hover:bg-slate-800"
                                 title="Copy VIN to clipboard"
                             >
                                 <Check v-if="copiedVin" class="w-4 h-4 text-emerald-400" />
@@ -550,69 +551,69 @@ const formatFileSize = (bytes: number | null | undefined) => {
                         :loading="syncingApi"
                         @click="syncVehicleApi"
                         title="Query ANK Shipping VIN API for vehicle specs and photos"
-                        class="col-span-2 sm:col-span-1"
+                        class="col-span-2 sm:col-span-1 rounded-xl font-bold"
                     >
                         <Sparkles class="w-4 h-4 text-amber-500" />
                         <span>Sync API</span>
                     </AppButton>
 
-                    <AppButton variant="secondary" size="sm" @click="openEditOrderModal">
+                    <AppButton variant="secondary" size="sm" @click="openEditOrderModal" class="rounded-xl font-bold">
                         <SquarePen class="w-4 h-4" /> Edit
                     </AppButton>
 
-                    <AppButton variant="primary" size="sm" @click="showPaymentModal = true" class="col-span-2 sm:col-span-1">
+                    <AppButton variant="primary" size="sm" @click="showPaymentModal = true" class="col-span-2 sm:col-span-1 rounded-xl font-bold shadow-md shadow-blue-600/30">
                         <DollarSign class="w-4 h-4" /> Record Payment
                     </AppButton>
                 </div>
             </div>
         </div>
 
-        <!-- Navigation Tabs (Mobile Touch Scrollable) -->
-        <div class="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2 overflow-x-auto no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
+        <!-- Navigation Tabs (Mobile Touch Scrollable Glass Bar) -->
+        <div class="p-1.5 rounded-2xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/80 dark:border-slate-800/80 shadow-xs flex items-center gap-1.5 overflow-x-auto no-scrollbar">
             <button
                 @click="activeTab = 'overview'"
-                class="px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all duration-150 flex items-center gap-2 shrink-0 cursor-pointer"
-                :class="activeTab === 'overview' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'"
+                class="px-4 py-2.5 rounded-xl font-extrabold text-xs sm:text-sm transition-all duration-150 flex items-center gap-2 shrink-0 cursor-pointer"
+                :class="activeTab === 'overview' ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60'"
             >
                 <Car class="w-4 h-4" />
                 <span>Overview & Photos</span>
             </button>
             <button
                 @click="activeTab = 'financials'"
-                class="px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all duration-150 flex items-center gap-2 shrink-0 cursor-pointer"
-                :class="activeTab === 'financials' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'"
+                class="px-4 py-2.5 rounded-xl font-extrabold text-xs sm:text-sm transition-all duration-150 flex items-center gap-2 shrink-0 cursor-pointer"
+                :class="activeTab === 'financials' ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60'"
             >
                 <DollarSign class="w-4 h-4" />
                 <span>Invoice & Payments</span>
             </button>
             <button
                 @click="activeTab = 'documents'"
-                class="px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all duration-150 flex items-center gap-2 shrink-0 cursor-pointer"
-                :class="activeTab === 'documents' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'"
+                class="px-4 py-2.5 rounded-xl font-extrabold text-xs sm:text-sm transition-all duration-150 flex items-center gap-2 shrink-0 cursor-pointer"
+                :class="activeTab === 'documents' ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60'"
             >
                 <FileText class="w-4 h-4" />
                 <span>Documents Vault ({{ order.documents?.length || 0 }})</span>
             </button>
             <button
                 @click="activeTab = 'emails'"
-                class="px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all duration-150 flex items-center gap-2 shrink-0 cursor-pointer"
-                :class="activeTab === 'emails' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'"
+                class="px-4 py-2.5 rounded-xl font-extrabold text-xs sm:text-sm transition-all duration-150 flex items-center gap-2 shrink-0 cursor-pointer"
+                :class="activeTab === 'emails' ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60'"
             >
                 <Mail class="w-4 h-4" />
                 <span>Linked Emails ({{ order.emails?.length || 0 }})</span>
             </button>
             <button
                 @click="activeTab = 'notes'"
-                class="px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all duration-150 flex items-center gap-2 shrink-0 cursor-pointer"
-                :class="activeTab === 'notes' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'"
+                class="px-4 py-2.5 rounded-xl font-extrabold text-xs sm:text-sm transition-all duration-150 flex items-center gap-2 shrink-0 cursor-pointer"
+                :class="activeTab === 'notes' ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60'"
             >
                 <MessageSquare class="w-4 h-4" />
                 <span>Staff Notes ({{ order.notes?.length || 0 }})</span>
             </button>
             <button
                 @click="activeTab = 'timeline'"
-                class="px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all duration-150 flex items-center gap-2 shrink-0 cursor-pointer"
-                :class="activeTab === 'timeline' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'"
+                class="px-4 py-2.5 rounded-xl font-extrabold text-xs sm:text-sm transition-all duration-150 flex items-center gap-2 shrink-0 cursor-pointer"
+                :class="activeTab === 'timeline' ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60'"
             >
                 <Clock class="w-4 h-4" />
                 <span>Audit Timeline</span>
@@ -725,7 +726,11 @@ const formatFileSize = (bytes: number | null | undefined) => {
         <div v-if="activeTab === 'financials'" class="space-y-6">
             <AppCard title="Invoice Line Items" description="Itemized billing breakdown (Description & Amount)">
                 <template #headerActions>
-                    <div class="flex items-center gap-2 flex-wrap">
+                    <div class="flex items-center gap-3 flex-wrap">
+                        <div class="flex items-center gap-1.5 text-xs font-semibold">
+                            <span class="text-slate-400">Payment Status:</span>
+                            <AppBadge :status="order.invoice?.status" size="md" />
+                        </div>
                         <AppButton size="sm" variant="outline" @click="showPrintInvoiceModal = true">
                             <Printer class="w-4 h-4 text-blue-600 dark:text-blue-400" /> Print / Download Invoice
                         </AppButton>

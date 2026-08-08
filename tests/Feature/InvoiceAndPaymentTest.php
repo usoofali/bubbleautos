@@ -33,7 +33,7 @@ test('adding and updating line items recalculates invoice totals and partial pay
     expect((float) $invoice->subtotal)->toBe(1500.0);
     expect((float) $invoice->total)->toBe(1500.0);
     expect((float) $invoice->balance)->toBe(1500.0);
-    expect($invoice->status->value)->toBe('unpaid');
+    expect($invoice->status->value)->toBe('pending');
 
     // Update item 2
     $invoiceService->updateItem($item2, ['description' => 'Customs Title Handling Revised', 'amount' => 250]);
@@ -54,5 +54,5 @@ test('adding and updating line items recalculates invoice totals and partial pay
 
     expect((float) $invoice->paid)->toBe(500.0);
     expect((float) $invoice->balance)->toBe(950.0);
-    expect($invoice->status->value)->toBe('partial');
+    expect($invoice->status->value)->toBe('partially_paid');
 });

@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\InvoiceStatus;
 use App\Enums\PaymentMethod;
 use App\Enums\ShipmentStatus;
 use App\Enums\TimelineEventType;
@@ -25,21 +26,19 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // 1. Roles
-        $adminRole = Role::create([
+        // 1. Roles
+        $adminRole = Role::firstOrCreate(['slug' => 'admin'], [
             'name' => 'Administrator',
-            'slug' => 'admin',
             'description' => 'Full system access and staff administration.',
         ]);
 
-        $managerRole = Role::create([
+        $managerRole = Role::firstOrCreate(['slug' => 'manager'], [
             'name' => 'Manager',
-            'slug' => 'manager',
             'description' => 'Operational oversight and management capabilities.',
         ]);
 
-        $staffRole = Role::create([
+        $staffRole = Role::firstOrCreate(['slug' => 'staff'], [
             'name' => 'Staff',
-            'slug' => 'staff',
             'description' => 'Operational access for processing orders, documents, and payments.',
         ]);
 
@@ -81,7 +80,7 @@ class DatabaseSeeder extends Seeder
 
         $createdPerms = [];
         foreach ($permissions as $p) {
-            $createdPerms[$p['slug']] = Permission::create($p);
+            $createdPerms[$p['slug']] = Permission::firstOrCreate(['slug' => $p['slug']], $p);
         }
 
         // Attach all to Admin
@@ -107,25 +106,22 @@ class DatabaseSeeder extends Seeder
         $staffRole->permissions()->sync($staffPermIds);
 
         // 3. Demo Users
-        $admin = User::create([
+        $admin = User::firstOrCreate(['email' => 'admin@bubbleautos.com'], [
             'name' => 'System Admin',
-            'email' => 'admin@bubbleautos.com',
             'password' => Hash::make('password'),
             'role_id' => $adminRole->id,
             'is_active' => true,
         ]);
 
-        $manager = User::create([
+        $manager = User::firstOrCreate(['email' => 'manager@bubbleautos.com'], [
             'name' => 'Operations Manager',
-            'email' => 'manager@bubbleautos.com',
             'password' => Hash::make('password'),
             'role_id' => $managerRole->id,
             'is_active' => true,
         ]);
 
-        $staff = User::create([
+        $staff = User::firstOrCreate(['email' => 'staff@bubbleautos.com'], [
             'name' => 'Front Desk Staff',
-            'email' => 'staff@bubbleautos.com',
             'password' => Hash::make('password'),
             'role_id' => $staffRole->id,
             'is_active' => true,
@@ -148,30 +144,27 @@ class DatabaseSeeder extends Seeder
         Setting::set('contact_email', 'contact@bubbleautos.com', 'website');
         Setting::set('contact_address', '100 Shipping Way, Houston, TX 77001', 'website');
 
-        // 5. Sample Customers
-        $c1 = Customer::create([
+        // 5. Customers
+        $c1 = Customer::firstOrCreate(['email' => 'johndoe@example.com'], [
             'name' => 'John Doe',
             'phone' => '+1 555-0192',
             'whatsapp' => '+1 555-0192',
-            'email' => 'johndoe@example.com',
             'address' => '123 Palm Street, Houston TX',
             'notes' => 'VIP Client - Frequent exporter',
             'created_by' => $admin->id,
         ]);
 
-        $c2 = Customer::create([
+        $c2 = Customer::firstOrCreate(['email' => 'sarah.j@example.com'], [
             'name' => 'Sarah Jenkins',
             'phone' => '+1 555-0482',
             'whatsapp' => '+1 555-0482',
-            'email' => 'sarah.j@example.com',
             'address' => '456 Ocean Boulevard, Miami FL',
             'notes' => 'Requires WhatsApp status updates for all shipments',
             'created_by' => $staff->id,
         ]);
 
         // 6. Sample Orders & Invoices & Payments
-        $o1 = Order::create([
-            'order_number' => 'BA-00001',
+        $o1 = Order::firstOrCreate(['order_number' => 'BA-00001'], [
             'vin' => '1FA6P8CF0H5123456',
             'make' => 'Ford',
             'model' => 'Mustang GT',
@@ -184,16 +177,15 @@ class DatabaseSeeder extends Seeder
             'expected_arrival' => now()->addDays(14),
         ]);
 
-        $inv1 = Invoice::create([
+        $inv1 = Invoice::firstOrCreate(['invoice_number' => 'INV-00001'], [
             'order_id' => $o1->id,
-            'invoice_number' => 'INV-00001',
             'subtotal' => 0,
             'discount' => 50,
             'total' => 0,
             'paid' => 0,
             'balance' => 0,
             'currency' => '$',
-            'status' => 'unpaid',
+            'status' => InvoiceStatus::PENDING,
         ]);
 
         $inv1->items()->createMany([
@@ -210,6 +202,8 @@ class DatabaseSeeder extends Seeder
             'notes' => 'Initial 50% deposit received',
             'recorded_by' => $staff->id,
         ]);
+
+        $inv1->recalculate();
 
         TimelineEvent::create([
             'order_id' => $o1->id,

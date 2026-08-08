@@ -25,9 +25,9 @@ defineProps<Props>();
     <Head title="Dashboard - BAMS" />
 
     <div class="space-y-6">
-        <AppPageHeader title="Dashboard" description="Bubble Autos Management System">
+        <AppPageHeader title="Logistics Operations Dashboard" description="Real-time vehicle shipment metrics, VIN tracking, and automated audit logs">
             <template #actions>
-                <div class="w-full sm:w-auto">
+                <div class="w-full sm:w-80">
                     <GlobalVinSearch />
                 </div>
             </template>
@@ -36,86 +36,87 @@ defineProps<Props>();
         <!-- High-Priority Email Review Callout Banner -->
         <div
             v-if="metrics.emails_to_review > 0"
-            class="p-4 sm:p-5 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm"
+            class="p-5 sm:p-6 rounded-3xl bg-amber-500/10 dark:bg-amber-950/40 backdrop-blur-xl border border-amber-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xs"
         >
-            <div class="flex items-start sm:items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-amber-500 text-slate-950 flex items-center justify-center font-bold shrink-0 shadow-xs mt-0.5 sm:mt-0">
+            <div class="flex items-start sm:items-center gap-3.5">
+                <div class="w-11 h-11 rounded-2xl bg-amber-500 text-slate-950 flex items-center justify-center font-bold shrink-0 shadow-xs mt-0.5 sm:mt-0">
                     <AlertCircle class="w-5 h-5 animate-pulse" />
                 </div>
                 <div class="space-y-0.5">
-                    <h4 class="text-sm font-bold text-amber-900 dark:text-amber-300 flex items-center gap-2">
-                        <span>{{ metrics.emails_to_review }} Shipping Email(s) Require Manual Review</span>
+                    <h4 class="text-sm sm:text-base font-extrabold text-amber-950 dark:text-amber-300 flex items-center gap-2">
+                        <span>{{ metrics.emails_to_review }} Unlinked Shipping Email(s) Require Review</span>
                         <span class="inline-block w-2 h-2 rounded-full bg-amber-500 animate-ping"></span>
                     </h4>
-                    <p class="text-xs text-amber-800/80 dark:text-amber-400/90 leading-relaxed">
-                        Incoming emails arrived without auto-matching VIN headers. Review and link them to vehicle orders.
+                    <p class="text-xs text-amber-900/80 dark:text-amber-400/90 leading-relaxed max-w-2xl">
+                        Incoming ocean line manifests and dock receipts arrived without auto-matched VIN headers. Review and assign them to orders.
                     </p>
                 </div>
             </div>
             <Link
                 href="/emails?status=needs_review"
-                class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs transition-all shadow-xs text-center shrink-0 active:scale-95 flex items-center justify-center gap-1.5"
+                class="w-full sm:w-auto px-5 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs transition-all shadow-md shadow-amber-500/20 text-center shrink-0 active:scale-95 flex items-center justify-center gap-2"
             >
-                Review Inbox Emails <ArrowRight class="w-3.5 h-3.5" />
+                <span>Review Inbox</span>
+                <ArrowRight class="w-4 h-4" />
             </Link>
         </div>
 
         <!-- Mobile-First Responsive Metrics Cards Grid -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
             <!-- Orders In Transit -->
-            <AppCard no-padding class="p-5 hover:-translate-y-0.5 transition-all duration-200 shadow-xs border-slate-200/80 dark:border-slate-800">
+            <AppCard no-padding hoverable class="p-5 sm:p-6 group border-slate-200/80 dark:border-slate-800/80">
                 <div class="flex items-center justify-between mb-3">
-                    <span class="text-xs font-bold uppercase tracking-wider text-slate-400">In Transit</span>
-                    <div class="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shadow-xs">
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">In Transit</span>
+                    <div class="w-11 h-11 rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shadow-2xs group-hover:scale-110 transition-transform">
                         <Car class="w-5 h-5" />
                     </div>
                 </div>
-                <div class="text-3xl font-black text-slate-900 dark:text-white mb-1 tracking-tight">
+                <div class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mb-1 tracking-tight">
                     {{ metrics.orders_in_transit }}
                 </div>
-                <p class="text-xs text-slate-500 dark:text-slate-400">Active shipped vehicle orders</p>
+                <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Active shipped vehicle orders</p>
             </AppCard>
 
             <!-- Delivered Orders -->
-            <AppCard no-padding class="p-5 hover:-translate-y-0.5 transition-all duration-200 shadow-xs border-slate-200/80 dark:border-slate-800">
+            <AppCard no-padding hoverable class="p-5 sm:p-6 group border-slate-200/80 dark:border-slate-800/80">
                 <div class="flex items-center justify-between mb-3">
-                    <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Delivered</span>
-                    <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shadow-xs">
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Delivered</span>
+                    <div class="w-11 h-11 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shadow-2xs group-hover:scale-110 transition-transform">
                         <CheckCircle2 class="w-5 h-5" />
                     </div>
                 </div>
-                <div class="text-3xl font-black text-slate-900 dark:text-white mb-1 tracking-tight">
+                <div class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mb-1 tracking-tight">
                     {{ metrics.delivered_orders }}
                 </div>
-                <p class="text-xs text-slate-500 dark:text-slate-400">Completed order deliveries</p>
+                <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Completed order deliveries</p>
             </AppCard>
 
             <!-- Outstanding Invoices -->
-            <AppCard no-padding class="p-5 hover:-translate-y-0.5 transition-all duration-200 shadow-xs border-slate-200/80 dark:border-slate-800">
+            <AppCard no-padding hoverable class="p-5 sm:p-6 group border-slate-200/80 dark:border-slate-800/80">
                 <div class="flex items-center justify-between mb-3">
-                    <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Unpaid Balance</span>
-                    <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shadow-xs">
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Unpaid Balance</span>
+                    <div class="w-11 h-11 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shadow-2xs group-hover:scale-110 transition-transform">
                         <DollarSign class="w-5 h-5" />
                     </div>
                 </div>
-                <div class="text-3xl font-black text-slate-900 dark:text-white mb-1 font-mono tracking-tight">
+                <div class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mb-1 font-mono tracking-tight">
                     ${{ metrics.outstanding_invoices_total.toLocaleString('en-US', { minimumFractionDigits: 2 }) }}
                 </div>
-                <p class="text-xs text-slate-500 dark:text-slate-400">{{ metrics.outstanding_invoices_count }} invoice(s) pending payment</p>
+                <p class="text-xs font-medium text-slate-500 dark:text-slate-400">{{ metrics.outstanding_invoices_count }} invoice(s) pending payment</p>
             </AppCard>
 
             <!-- Emails to Review -->
-            <AppCard no-padding class="p-5 hover:-translate-y-0.5 transition-all duration-200 shadow-xs border-slate-200/80 dark:border-slate-800">
+            <AppCard no-padding hoverable class="p-5 sm:p-6 group border-slate-200/80 dark:border-slate-800/80">
                 <div class="flex items-center justify-between mb-3">
-                    <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Emails Inbox</span>
-                    <div class="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center shadow-xs">
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Emails Inbox</span>
+                    <div class="w-11 h-11 rounded-2xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center shadow-2xs group-hover:scale-110 transition-transform">
                         <Mail class="w-5 h-5" />
                     </div>
                 </div>
-                <div class="text-3xl font-black text-slate-900 dark:text-white mb-1 tracking-tight">
+                <div class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mb-1 tracking-tight">
                     {{ metrics.emails_to_review }}
                 </div>
-                <p class="text-xs text-slate-500 dark:text-slate-400">Unlinked communications</p>
+                <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Unlinked communications</p>
             </AppCard>
         </div>
 
@@ -125,47 +126,49 @@ defineProps<Props>();
             <AppCard class="lg:col-span-2" title="Recent Vehicle Orders" description="Latest registered vehicle shipments and status updates">
                 <template #headerActions>
                     <Link href="/orders" class="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">
-                        View All <ArrowRight class="w-3.5 h-3.5" />
+                        <span>View All Orders</span>
+                        <ArrowRight class="w-3.5 h-3.5" />
                     </Link>
                 </template>
 
                 <div class="overflow-x-auto custom-scrollbar -mx-6 px-6">
                     <table class="w-full text-left text-sm whitespace-nowrap min-w-[500px]">
-                        <thead class="text-xs uppercase font-bold text-slate-400 border-b border-slate-100 dark:border-slate-800 pb-2">
+                        <thead class="text-[11px] uppercase font-extrabold text-slate-400 border-b border-slate-100 dark:border-slate-800/80 pb-2">
                             <tr>
-                                <th class="py-2.5">Order #</th>
-                                <th class="py-2.5">VIN / Vehicle</th>
-                                <th class="py-2.5">Customer</th>
-                                <th class="py-2.5">Status</th>
-                                <th class="py-2.5 text-right">Action</th>
+                                <th class="py-3">Order #</th>
+                                <th class="py-3">VIN / Vehicle Specs</th>
+                                <th class="py-3">Customer</th>
+                                <th class="py-3">Status</th>
+                                <th class="py-3 text-right">Action</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-slate-100 dark:divide-slate-800 font-medium">
-                            <tr v-for="order in recentOrders" :key="order.id" class="hover:bg-slate-50/70 dark:hover:bg-slate-800/50 transition-colors">
-                                <td class="py-3 font-bold text-blue-600 dark:text-blue-400">
+                        <tbody class="divide-y divide-slate-100 dark:divide-slate-800/80 font-medium">
+                            <tr v-for="order in recentOrders" :key="order.id" class="hover:bg-blue-50/40 dark:hover:bg-blue-950/30 transition-colors">
+                                <td class="py-3.5 font-bold text-blue-600 dark:text-blue-400">
                                     <Link :href="`/orders/${order.id}`" class="hover:underline">{{ order.order_number }}</Link>
                                 </td>
-                                <td class="py-3">
-                                    <div class="font-mono text-xs font-bold text-slate-900 dark:text-slate-100 uppercase">{{ order.vin }}</div>
-                                    <div class="text-xs text-slate-400">{{ order.year ? order.year + ' ' : '' }}{{ order.make || '' }} {{ order.model || '' }}</div>
+                                <td class="py-3.5">
+                                    <div class="font-mono text-xs font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wide">{{ order.vin }}</div>
+                                    <div class="text-xs text-slate-400 font-medium">{{ order.year ? order.year + ' ' : '' }}{{ order.make || '' }} {{ order.model || '' }}</div>
                                 </td>
-                                <td class="py-3 text-slate-700 dark:text-slate-300 font-semibold">
+                                <td class="py-3.5 text-slate-700 dark:text-slate-300 font-semibold text-xs">
                                     {{ order.customer?.name || 'N/A' }}
                                 </td>
-                                <td class="py-3">
+                                <td class="py-3.5">
                                     <AppBadge :status="order.status" size="sm" />
                                 </td>
-                                <td class="py-3 text-right">
+                                <td class="py-3.5 text-right">
                                     <Link
                                         :href="`/orders/${order.id}`"
-                                        class="inline-flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400 p-1.5 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-colors"
+                                        class="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400 px-3 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/60 dark:hover:bg-blue-900/60 transition-colors shrink-0"
                                     >
-                                        Open <ArrowRight class="w-3.5 h-3.5" />
+                                        <span>Workspace</span>
+                                        <ArrowRight class="w-3.5 h-3.5" />
                                     </Link>
                                 </td>
                             </tr>
                             <tr v-if="!recentOrders || recentOrders.length === 0">
-                                <td colspan="5" class="py-6 text-center text-slate-400 italic text-xs">No orders recorded yet.</td>
+                                <td colspan="5" class="py-8 text-center text-slate-400 italic text-xs">No orders recorded yet.</td>
                             </tr>
                         </tbody>
                     </table>
@@ -174,23 +177,23 @@ defineProps<Props>();
 
             <!-- Activity Stream -->
             <AppCard title="Operational Stream" description="Chronological audit log of operations">
-                <div class="space-y-4 max-h-[380px] overflow-y-auto custom-scrollbar pr-1 relative">
+                <div class="space-y-4 max-h-[390px] overflow-y-auto custom-scrollbar pr-1 relative">
                     <!-- Vertical Connector Line -->
-                    <div class="absolute left-3.5 top-3 bottom-3 w-0.5 bg-slate-200 dark:bg-slate-800 -z-0"></div>
+                    <div class="absolute left-4 top-3 bottom-3 w-0.5 bg-slate-200 dark:bg-slate-800 -z-0"></div>
 
                     <div v-for="evt in recentTimeline" :key="evt.id" class="flex gap-3 text-xs relative z-10">
-                        <div class="w-7 h-7 rounded-full bg-white dark:bg-slate-800 border border-blue-500/40 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
-                            <Clock class="w-3.5 h-3.5" />
+                        <div class="w-8 h-8 rounded-full bg-white dark:bg-slate-900 border border-blue-500/40 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 mt-0.5 shadow-2xs">
+                            <Clock class="w-4 h-4" />
                         </div>
-                        <div class="flex-1 bg-slate-50/70 dark:bg-slate-800/40 p-3 rounded-xl border border-slate-100 dark:border-slate-800/60 space-y-1">
+                        <div class="flex-1 bg-slate-50/80 dark:bg-slate-950/50 p-3.5 rounded-2xl border border-slate-100 dark:border-slate-800/80 space-y-1 transition-all">
                             <div class="flex items-center justify-between gap-2">
-                                <span class="font-bold text-slate-900 dark:text-white">{{ evt.title }}</span>
+                                <span class="font-extrabold text-slate-900 dark:text-white">{{ evt.title }}</span>
                                 <span class="text-[10px] font-semibold text-slate-400 shrink-0">{{ new Date(evt.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}</span>
                             </div>
-                            <p class="text-slate-500 dark:text-slate-400 leading-relaxed">{{ evt.description }}</p>
+                            <p class="text-slate-600 dark:text-slate-400 leading-relaxed text-xs">{{ evt.description }}</p>
                             <div v-if="evt.order" class="pt-1">
-                                <Link :href="`/orders/${evt.order.id}`" class="text-[11px] font-bold text-blue-600 hover:underline inline-flex items-center gap-1">
-                                    Order {{ evt.order.order_number }} (VIN: {{ evt.order.vin.substring(0, 8) }}...)
+                                <Link :href="`/orders/${evt.order.id}`" class="text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1">
+                                    <span>Order {{ evt.order.order_number }} (VIN: {{ evt.order.vin.substring(0, 8) }}...)</span>
                                 </Link>
                             </div>
                         </div>
