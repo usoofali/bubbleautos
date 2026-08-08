@@ -14,7 +14,7 @@ class InvoiceController extends Controller
 
     public function addItem(Request $request, Invoice $invoice): RedirectResponse
     {
-        $this->authorize('update', $invoice->order);
+        $this->authorize('manageItems', $invoice);
 
         $validated = $request->validate([
             'description' => 'required|string|max:255',
@@ -28,7 +28,7 @@ class InvoiceController extends Controller
 
     public function updateItem(Request $request, InvoiceItem $item): RedirectResponse
     {
-        $this->authorize('update', $item->invoice->order);
+        $this->authorize('manageItems', $item->invoice);
 
         $validated = $request->validate([
             'description' => 'required|string|max:255',
@@ -42,7 +42,7 @@ class InvoiceController extends Controller
 
     public function removeItem(InvoiceItem $item): RedirectResponse
     {
-        $this->authorize('update', $item->invoice->order);
+        $this->authorize('manageItems', $item->invoice);
 
         $this->invoiceService->removeItem($item);
 

@@ -61,9 +61,13 @@ class DatabaseSeeder extends Seeder
             ['name' => 'Upload Documents', 'slug' => 'documents.upload', 'group' => 'Documents'],
             ['name' => 'Delete Documents', 'slug' => 'documents.delete', 'group' => 'Documents'],
 
+            // Invoices
+            ['name' => 'View Invoices', 'slug' => 'invoices.view', 'group' => 'Invoices'],
+            ['name' => 'Manage Invoice Items', 'slug' => 'invoices.manage_items', 'group' => 'Invoices'],
+
             // Payments
             ['name' => 'Create Payments', 'slug' => 'payments.create', 'group' => 'Payments'],
-            ['name' => 'Edit Payments', 'slug' => 'payments.edit', 'group' => 'Payments'],
+            ['name' => 'Update Payment Status', 'slug' => 'payments.update_status', 'group' => 'Payments'],
             ['name' => 'Delete Payments', 'slug' => 'payments.delete', 'group' => 'Payments'],
 
             // Emails
@@ -93,7 +97,8 @@ class DatabaseSeeder extends Seeder
         $staffPermSlugs = [
             'orders.view', 'orders.create', 'orders.edit',
             'customers.view', 'customers.create', 'customers.edit',
-            'documents.upload', 'payments.create', 'emails.review',
+            'documents.upload', 'invoices.view', 'invoices.manage_items',
+            'payments.create', 'payments.update_status', 'emails.review',
         ];
         $staffPermIds = collect($createdPerms)
             ->filter(fn ($p) => in_array($p->slug, $staffPermSlugs))

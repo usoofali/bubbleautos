@@ -24,6 +24,7 @@ const resolvedVariant = computed(() => {
             return 'emerald';
         case 'in_transit':
         case 'dispatched':
+        case 'partially_paid':
         case 'partial':
         case 'received':
             return 'blue';

@@ -59,11 +59,11 @@ class Invoice extends Model
         $paid = (float) $this->payments()->sum('amount');
         $balance = max(0, $total - $paid);
 
-        $status = InvoiceStatus::UNPAID;
+        $status = InvoiceStatus::PENDING;
         if ($paid >= $total && $total > 0) {
             $status = InvoiceStatus::PAID;
         } elseif ($paid > 0) {
-            $status = InvoiceStatus::PARTIAL;
+            $status = InvoiceStatus::PARTIALLY_PAID;
         }
 
         $this->update([

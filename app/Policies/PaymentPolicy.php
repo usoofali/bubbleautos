@@ -12,6 +12,11 @@ class PaymentPolicy
         return $user->hasPermission('payments.create');
     }
 
+    public function updateStatus(User $user): bool
+    {
+        return $user->hasPermission('payments.update_status') || $user->hasPermission('payments.create');
+    }
+
     public function delete(User $user, ?Payment $payment = null): bool
     {
         return $user->hasPermission('payments.delete');
