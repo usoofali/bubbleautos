@@ -145,7 +145,7 @@ onMounted(() => {
                     <AppLogo />
                     <div class="hidden md:flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-400 text-xs font-semibold">
                         <span class="w-2 h-2 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse"></span>
-                        <span>System Operational v2.4</span>
+                        <span>System Version 1.0</span>
                     </div>
                 </div>
 
@@ -179,7 +179,7 @@ onMounted(() => {
                 <!-- Hero Badge -->
                 <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/70 border border-blue-200 dark:border-blue-800/60 text-blue-700 dark:text-blue-400 text-xs font-bold uppercase tracking-wider mb-6 shadow-xs">
                     <Sparkles class="w-3.5 h-3.5" />
-                    <span>Next-Gen Vehicle Shipment & Logistics Intelligence</span>
+                    <span>Next-Gen Vehicle Order Management</span>
                 </div>
 
                 <!-- Hero Title -->

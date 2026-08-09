@@ -394,7 +394,7 @@
     "isEntry": true
   },
   "resources/js/app.ts": {
-    "file": "assets/app-C85NcVnS.js",
+    "file": "assets/app-ySXpEHQb.js",
     "name": "app",
     "src": "resources/js/app.ts",
     "isEntry": true,
@@ -657,7 +657,7 @@
     ]
   },
   "resources/js/pages/Welcome.vue": {
-    "file": "assets/Welcome-BqFxCpwU.js",
+    "file": "assets/Welcome-BmDH97-z.js",
     "name": "Welcome",
     "src": "resources/js/pages/Welcome.vue",
     "isDynamicEntry": true,
