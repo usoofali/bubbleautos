@@ -27,13 +27,13 @@ withDefaults(defineProps<Props>(), {
 <template>
     <div class="w-full overflow-x-auto rounded-3xl border border-slate-200/80 dark:border-slate-800/80 bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl shadow-xs dark:shadow-xl dark:shadow-slate-950/40 transition-colors">
         <table class="w-full text-left text-sm text-slate-700 dark:text-slate-300">
-            <thead class="bg-slate-50/80 dark:bg-slate-950/80 text-[11px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500 border-b border-slate-200/80 dark:border-slate-800/80">
+            <thead class="bg-slate-50/80 dark:bg-slate-950/80 text-[11px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500 border-b border-slate-200/80 dark:border-slate-800/80 whitespace-nowrap">
                 <tr>
                     <slot name="header">
                         <th
                             v-for="col in columns"
                             :key="col.key"
-                            class="px-6 py-4"
+                            class="px-4 sm:px-6 py-4"
                             :class="{
                                 'text-center': col.align === 'center',
                                 'text-right': col.align === 'right',

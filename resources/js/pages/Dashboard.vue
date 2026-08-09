@@ -25,7 +25,7 @@ defineProps<Props>();
     <Head title="Dashboard - BAMS" />
 
     <div class="space-y-6">
-        <AppPageHeader title="Logistics Operations Dashboard" description="Real-time vehicle shipment metrics, VIN tracking, and automated audit logs">
+        <AppPageHeader title="Operations Dashboard" description="Real-time vehicle metrics, VIN tracking, and automated audit logs">
             <template #actions>
                 <div class="w-full sm:w-80">
                     <GlobalVinSearch />
@@ -44,7 +44,7 @@ defineProps<Props>();
                 </div>
                 <div class="space-y-0.5">
                     <h4 class="text-sm sm:text-base font-extrabold text-amber-950 dark:text-amber-300 flex items-center gap-2">
-                        <span>{{ metrics.emails_to_review }} Unlinked Shipping Email(s) Require Review</span>
+                        <span>{{ metrics.emails_to_review }} Unlinked Order Email(s) Require Review</span>
                         <span class="inline-block w-2 h-2 rounded-full bg-amber-500 animate-ping"></span>
                     </h4>
                     <p class="text-xs text-amber-900/80 dark:text-amber-400/90 leading-relaxed max-w-2xl">
@@ -123,7 +123,7 @@ defineProps<Props>();
         <!-- Responsive Layout: Recent Orders & Operational Stream -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <!-- Recent Vehicle Orders -->
-            <AppCard class="lg:col-span-2" title="Recent Vehicle Orders" description="Latest registered vehicle shipments and status updates">
+            <AppCard class="lg:col-span-2" title="Recent Vehicle Orders" description="Latest registered orders">
                 <template #headerActions>
                     <Link href="/orders" class="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">
                         <span>View All Orders</span>
@@ -132,32 +132,32 @@ defineProps<Props>();
                 </template>
 
                 <div class="overflow-x-auto custom-scrollbar -mx-6 px-6">
-                    <table class="w-full text-left text-sm whitespace-nowrap min-w-[500px]">
+                    <table class="w-full text-left text-sm whitespace-nowrap min-w-[640px]">
                         <thead class="text-[11px] uppercase font-extrabold text-slate-400 border-b border-slate-100 dark:border-slate-800/80 pb-2">
                             <tr>
-                                <th class="py-3">Order #</th>
-                                <th class="py-3">VIN / Vehicle Specs</th>
-                                <th class="py-3">Customer</th>
-                                <th class="py-3">Status</th>
-                                <th class="py-3 text-right">Action</th>
+                                <th class="px-4 py-3 min-w-[100px]">Order #</th>
+                                <th class="px-4 py-3 min-w-[180px]">VIN / Vehicle Specs</th>
+                                <th class="px-4 py-3 min-w-[140px]">Customer</th>
+                                <th class="px-4 py-3 min-w-[130px]">Status</th>
+                                <th class="px-4 py-3 text-right min-w-[110px]">Action</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100 dark:divide-slate-800/80 font-medium">
                             <tr v-for="order in recentOrders" :key="order.id" class="hover:bg-blue-50/40 dark:hover:bg-blue-950/30 transition-colors">
-                                <td class="py-3.5 font-bold text-blue-600 dark:text-blue-400">
+                                <td class="px-4 py-3.5 font-bold text-blue-600 dark:text-blue-400">
                                     <Link :href="`/orders/${order.id}`" class="hover:underline">{{ order.order_number }}</Link>
                                 </td>
-                                <td class="py-3.5">
+                                <td class="px-4 py-3.5">
                                     <div class="font-mono text-xs font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wide">{{ order.vin }}</div>
                                     <div class="text-xs text-slate-400 font-medium">{{ order.year ? order.year + ' ' : '' }}{{ order.make || '' }} {{ order.model || '' }}</div>
                                 </td>
-                                <td class="py-3.5 text-slate-700 dark:text-slate-300 font-semibold text-xs">
+                                <td class="px-4 py-3.5 text-slate-700 dark:text-slate-300 font-semibold text-xs">
                                     {{ order.customer?.name || 'N/A' }}
                                 </td>
-                                <td class="py-3.5">
+                                <td class="px-4 py-3.5">
                                     <AppBadge :status="order.status" size="sm" />
                                 </td>
-                                <td class="py-3.5 text-right">
+                                <td class="px-4 py-3.5 text-right">
                                     <Link
                                         :href="`/orders/${order.id}`"
                                         class="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400 px-3 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/60 dark:hover:bg-blue-900/60 transition-colors shrink-0"

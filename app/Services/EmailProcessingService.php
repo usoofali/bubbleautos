@@ -2,8 +2,10 @@
 
 namespace App\Services;
 
+use App\Enums\DocumentType;
 use App\Enums\EmailStatus;
 use App\Enums\TimelineEventType;
+use App\Models\Document;
 use App\Models\Email;
 use App\Models\Order;
 use Illuminate\Support\Facades\DB;
@@ -101,24 +103,58 @@ class EmailProcessingService
         });
     }
 
-    public function linkToOrder(Email $email, Order $order): Email
+    public function linkToOrder(Email $email, Order $order, array $attachmentDocumentTypes = []): Email
     {
-        return DB::transaction(function () use ($email, $order) {
+        return DB::transaction(function () use ($email, $order, $attachmentDocumentTypes) {
             $email->update([
                 'order_id' => $order->id,
                 'processing_status' => EmailStatus::MATCHED,
             ]);
 
+            $importedDocsCount = 0;
+
+            if (! empty($attachmentDocumentTypes)) {
+                $attachments = $email->attachments()->whereIn('id', array_keys($attachmentDocumentTypes))->get();
+
+                foreach ($attachments as $attachment) {
+                    $docTypeValue = $attachmentDocumentTypes[$attachment->id] ?? null;
+
+                    if ($docTypeValue && $docTypeValue !== 'skip' && $docTypeValue !== 'none') {
+                        $docTypeEnum = DocumentType::tryFrom($docTypeValue);
+
+                        if ($docTypeEnum) {
+                            Document::create([
+                                'order_id' => $order->id,
+                                'title' => $attachment->filename,
+                                'document_type' => $docTypeEnum,
+                                'file_path' => $attachment->file_path,
+                                'file_name' => $attachment->filename,
+                                'file_size' => $attachment->file_size,
+                                'mime_type' => $attachment->mime_type,
+                                'uploaded_by' => auth()->id(),
+                                'uploaded_at' => now(),
+                            ]);
+                            $importedDocsCount++;
+                        }
+                    }
+                }
+            }
+
+            $logDescription = "Email '{$email->subject}' from {$email->sender} manually assigned to order by staff.";
+            if ($importedDocsCount > 0) {
+                $logDescription .= " Imported {$importedDocsCount} attachment(s) into Order Documents.";
+            }
+
             TimelineService::log(
                 $order,
                 TimelineEventType::EMAIL_RECEIVED,
                 'Email Manually Linked',
-                "Email '{$email->subject}' from {$email->sender} manually assigned to order by staff."
+                $logDescription
             );
 
             ActivityLogService::log(
                 'email.manually_linked',
-                "Manually linked email '{$email->subject}' to order {$order->order_number}",
+                "Manually linked email '{$email->subject}' to order {$order->order_number} ({$importedDocsCount} document(s) imported)",
                 Email::class,
                 $email->id
             );

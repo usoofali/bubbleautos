@@ -60,7 +60,7 @@ const clearSearch = () => {
                 type="text"
                 v-model="searchQuery"
                 @focus="showResults = true"
-                placeholder="Instant VIN Search (e.g. 1FA6..., BA-00001, John)..."
+                placeholder="Search VIN (e.g. 1FA6..., BA-00001, John)..."
                 class="w-full pl-10 pr-9 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
             />
             <button

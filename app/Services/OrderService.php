@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\InvoiceStatus;
 use App\Enums\ShipmentStatus;
 use App\Enums\TimelineEventType;
 use App\Models\Invoice;
@@ -32,7 +33,7 @@ class OrderService
                 'paid' => 0,
                 'balance' => 0,
                 'currency' => $currency,
-                'status' => \App\Enums\InvoiceStatus::PENDING,
+                'status' => InvoiceStatus::PENDING,
             ]);
 
             TimelineService::log(

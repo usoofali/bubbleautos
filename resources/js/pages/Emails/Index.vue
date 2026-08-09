@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { Head, useForm, router } from '@inertiajs/vue3';
 import AppPageHeader from '@/components/common/AppPageHeader.vue';
 import AppCard from '@/components/common/AppCard.vue';
@@ -17,6 +17,7 @@ interface Props {
     emails: any;
     orders: any[];
     statusOptions?: Array<{ value: string; label: string }>;
+    documentTypeOptions?: Array<{ value: string; label: string }>;
     filters: { status: string; search: string };
 }
 
@@ -42,12 +43,63 @@ const clearSearch = () => {
 // Email View Modal
 const viewingEmail = ref<any>(null);
 
+// Smart Document Type Auto-Detection based on ANK Shipping Carrier Filename Conventions
+const autoDetectDocumentType = (filename: string): string => {
+    const lower = (filename || '').toLowerCase();
+    if (lower.startsWith('bl_') || lower.startsWith('bl-') || lower.includes('lading') || lower.includes('draft')) {
+        return 'bill_of_lading';
+    }
+    if (lower.startsWith('invoice_') || lower.startsWith('inv_') || lower.includes('invoice')) {
+        return 'invoice';
+    }
+    if (lower.includes('dock') || lower.includes('receipt')) {
+        return 'dock_receipt';
+    }
+    if (lower.includes('title') || lower.includes('cert')) {
+        return 'title';
+    }
+    if (lower.includes('telex') || lower.includes('release')) {
+        return 'telex_release';
+    }
+    return 'other';
+};
+
+const defaultDocTypes = [
+    { value: 'bill_of_lading', label: 'Bill of Lading' },
+    { value: 'dock_receipt', label: 'Dock Receipt' },
+    { value: 'invoice', label: 'Invoice Document' },
+    { value: 'title', label: 'Vehicle Title' },
+    { value: 'telex_release', label: 'Telex Release (Printable Text)' },
+    { value: 'other', label: 'Other Document' },
+];
+
+const availableDocTypeOptions = computed(() => [
+    { value: 'skip', label: '-- Do Not Import / Skip File --' },
+    ...(props.documentTypeOptions && props.documentTypeOptions.length > 0
+        ? props.documentTypeOptions
+        : defaultDocTypes),
+]);
+
 // Manual Link Email Modal
 const linkingEmail = ref<any>(null);
 const linkForm = useForm({
     order_id: '',
     status: '',
+    attachment_document_types: {} as Record<number, string>,
 });
+
+const openLinkModal = (em: any) => {
+    linkingEmail.value = em;
+    const attachmentDocTypes: Record<number, string> = {};
+    if (em.attachments && em.attachments.length > 0) {
+        em.attachments.forEach((att: any) => {
+            attachmentDocTypes[att.id] = autoDetectDocumentType(att.filename);
+        });
+    }
+    linkForm.order_id = '';
+    linkForm.status = '';
+    linkForm.attachment_document_types = attachmentDocTypes;
+};
 
 const submitLinkEmail = () => {
     if (!linkingEmail.value) return;
@@ -55,7 +107,7 @@ const submitLinkEmail = () => {
         onSuccess: () => {
             linkingEmail.value = null;
             linkForm.reset();
-            showToast.success('Email linked to order successfully!');
+            showToast.success('Email linked and attachments imported to order successfully!');
         },
     });
 };
@@ -116,7 +168,7 @@ const triggerImapFetch = () => {
     <Head title="Email Inbox - BAMS" />
 
     <div class="space-y-6">
-        <AppPageHeader title="Shipping Email Inbox" description="Ingest incoming shipping emails from operations@ankshipping.com, extract VINs automatically, and match paperwork to vehicle orders">
+        <AppPageHeader title="Shipping Email Inbox" description="Ingest incoming order emails from operations@ankshipping.com, extract VINs automatically, and match paperwork to vehicle orders">
             <template #actions>
                 <div class="w-full sm:w-auto">
                     <AppButton variant="primary" size="md" :loading="fetchingImap" @click="triggerImapFetch" title="Fetch incoming shipping emails for operations@ankshipping.com" class="w-full sm:w-auto shadow-xs">
@@ -229,7 +281,7 @@ const triggerImapFetch = () => {
                         v-if="em.processing_status === 'needs_review' || !em.order_id"
                         variant="amber"
                         size="sm"
-                        @click="linkingEmail = em"
+                        @click="openLinkModal(em)"
                         class="flex-1 md:flex-initial"
                     >
                         <LinkIcon class="w-4 h-4" /> Link Order
@@ -342,7 +394,7 @@ const triggerImapFetch = () => {
     </AppModal>
 
     <!-- Manual Link Modal -->
-    <AppModal :show="!!linkingEmail" title="Manually Link Email to Order" @close="linkingEmail = null">
+    <AppModal :show="!!linkingEmail" title="Manually Link Email & Import Documents" maxWidth="xl" @close="linkingEmail = null">
         <form @submit.prevent="submitLinkEmail" class="space-y-4">
             <p class="text-xs text-slate-500 dark:text-slate-400">
                 Select the target vehicle order for email: <strong class="text-slate-900 dark:text-white">"{{ linkingEmail?.subject }}"</strong>
@@ -354,6 +406,7 @@ const triggerImapFetch = () => {
                     </option>
                 </AppSelect>
             </AppFormField>
+
             <AppFormField label="Update Shipment Status (Optional)" :error="linkForm.errors.status">
                 <AppSelect
                     v-model="linkForm.status"
@@ -361,9 +414,41 @@ const triggerImapFetch = () => {
                     placeholder="Leave unchanged or pick new status..."
                 />
             </AppFormField>
-            <div class="flex justify-end gap-3 pt-2">
+
+            <!-- Attachment Import & Document Type Assignment Section -->
+            <div v-if="linkingEmail?.attachments && linkingEmail.attachments.length > 0" class="space-y-3 pt-3 border-t border-slate-200 dark:border-slate-800">
+                <div class="flex items-center justify-between">
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                        <Paperclip class="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
+                        <span>Import Email Attachments as Order Documents ({{ linkingEmail.attachments.length }})</span>
+                    </h4>
+                </div>
+                <p class="text-[11px] text-slate-500 dark:text-slate-400">
+                    Document types auto-detected from filename. Select document type to import attachment into Order Documents:
+                </p>
+                <div class="space-y-2.5 max-h-60 overflow-y-auto pr-1 custom-scrollbar">
+                    <div
+                        v-for="att in linkingEmail.attachments"
+                        :key="att.id"
+                        class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                    >
+                        <div class="min-w-0 flex-1">
+                            <span class="font-bold text-xs text-slate-900 dark:text-white block truncate">{{ att.filename }}</span>
+                            <span class="text-[10px] text-slate-400">Size: {{ Math.round((att.file_size || 102400) / 1024) }} KB</span>
+                        </div>
+                        <div class="w-full sm:w-60 shrink-0">
+                            <AppSelect
+                                v-model="linkForm.attachment_document_types[att.id]"
+                                :options="availableDocTypeOptions"
+                            />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-3 pt-3 border-t border-slate-200 dark:border-slate-800">
                 <AppButton variant="outline" @click="linkingEmail = null">Cancel</AppButton>
-                <AppButton type="submit" variant="primary" :loading="linkForm.processing">Link Email & Update Order</AppButton>
+                <AppButton type="submit" variant="primary" :loading="linkForm.processing">Link Email & Import Documents</AppButton>
             </div>
         </form>
     </AppModal>

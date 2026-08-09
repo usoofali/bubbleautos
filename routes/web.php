@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Route;
 
 // Public Landing Page
 Route::get('/', WelcomeController::class)->name('home');
+Route::get('/api/public/vin-lookup', [WelcomeController::class, 'lookupVin'])->name('public.vin-lookup');
 
 // Authenticated Routes
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -78,6 +79,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/roles', [RoleController::class, 'store'])->name('roles.store');
     Route::patch('/roles/{role}', [RoleController::class, 'update'])->name('roles.update');
     Route::delete('/roles/{role}', [RoleController::class, 'destroy'])->name('roles.destroy');
+
+    // Preset Invoice Item Catalog
+    Route::get('/invoice-item-templates', [App\Http\Controllers\InvoiceItemTemplateController::class, 'index'])->name('invoice-item-templates.index');
+    Route::post('/invoice-item-templates', [App\Http\Controllers\InvoiceItemTemplateController::class, 'store'])->name('invoice-item-templates.store');
+    Route::patch('/invoice-item-templates/{invoiceItemTemplate}', [App\Http\Controllers\InvoiceItemTemplateController::class, 'update'])->name('invoice-item-templates.update');
+    Route::delete('/invoice-item-templates/{invoiceItemTemplate}', [App\Http\Controllers\InvoiceItemTemplateController::class, 'destroy'])->name('invoice-item-templates.destroy');
 
     // System & CMS Settings
     Route::get('/settings/system', [SettingController::class, 'index'])->name('settings.index');

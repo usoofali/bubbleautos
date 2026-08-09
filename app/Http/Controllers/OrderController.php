@@ -139,6 +139,7 @@ class OrderController extends Controller
                 'value' => $s->value,
                 'label' => $s->label(),
             ], ShipmentStatus::cases()),
+            'invoiceItemTemplates' => \App\Models\InvoiceItemTemplate::orderBy('description')->get(['id', 'description', 'default_amount']),
         ]);
     }
 

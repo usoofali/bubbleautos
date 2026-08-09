@@ -75,6 +75,7 @@ const props = defineProps<{
         email?: string;
         phone?: string;
     };
+    invoiceItemTemplates?: Array<{ id: number; description: string; default_amount: number | string }>;
 }>();
 
 const activeTab = ref<'overview' | 'financials' | 'documents' | 'emails' | 'notes' | 'timeline'>('overview');
@@ -217,19 +218,32 @@ const submitTrackingUpdate = () => {
 // Line Item Form (Description + Amount only, with Edit capability)
 const showItemModal = ref(false);
 const editingItem = ref<any>(null);
+const selectedTemplateId = ref<string | number>('');
 const itemForm = useForm({
     description: '',
     amount: '',
 });
 
+const onPresetTemplateSelected = (val: any) => {
+    selectedTemplateId.value = val;
+    if (!val) return;
+    const tmpl = props.invoiceItemTemplates?.find(t => t.id === Number(val));
+    if (tmpl) {
+        itemForm.description = tmpl.description;
+        itemForm.amount = String(tmpl.default_amount);
+    }
+};
+
 const openAddItemModal = () => {
     editingItem.value = null;
+    selectedTemplateId.value = '';
     itemForm.reset();
     showItemModal.value = true;
 };
 
 const openEditItemModal = (item: any) => {
     editingItem.value = item;
+    selectedTemplateId.value = '';
     itemForm.description = item.description;
     itemForm.amount = item.amount;
     showItemModal.value = true;
@@ -448,6 +462,68 @@ const shareDocumentViaWhatsapp = async (doc: any) => {
     window.open(url, '_blank');
 };
 
+const shareInvoiceViaWhatsapp = () => {
+    const rawPhone = props.order.customer?.phone || '';
+    const phone = formatPhoneForWhatsapp(rawPhone);
+    const vehicle = [props.order.year, props.order.make, props.order.model].filter(Boolean).join(' ') || 'Vehicle';
+    const total = Number(props.order.invoice?.total || 0).toFixed(2);
+    const paid = Number(props.order.invoice?.paid || 0).toFixed(2);
+    const balance = Number(props.order.invoice?.balance || 0).toFixed(2);
+    const items = props.order.invoice?.items || [];
+
+    let text = `*BUBBLES AUTOS - OFFICIAL INVOICE*\n\n`;
+    text += `📋 *Invoice #:* Invoice# ${props.order.order_number}\n`;
+    text += `🔖 *Order #:* ${props.order.order_number}\n`;
+    text += `🚗 *Vehicle:* ${vehicle}\n`;
+    text += `🔑 *VIN:* ${props.order.vin}\n`;
+    text += `👤 *Customer:* ${props.order.customer?.name || 'Valued Customer'}\n\n`;
+
+    if (items.length > 0) {
+        text += `--- *ITEMIZED BILLING* ---\n`;
+        items.forEach((item: any, idx: number) => {
+            text += `${idx + 1}. ${item.description}: *$${Number(item.amount).toFixed(2)}*\n`;
+        });
+        text += `\n`;
+    }
+
+    text += `💰 *Total Invoice Amount:* $${total}\n`;
+    text += `✅ *Amount Paid:* $${paid}\n`;
+    text += `💳 *Balance Due:* *$${balance}*\n\n`;
+    text += `Thank you for doing business with Bubbles Autos!`;
+
+    const encodedText = encodeURIComponent(text);
+    const url = phone ? `https://wa.me/${phone}?text=${encodedText}` : `https://wa.me/?text=${encodedText}`;
+    window.open(url, '_blank');
+};
+
+const shareReceiptViaWhatsapp = (payment: any) => {
+    if (!payment) return;
+    const rawPhone = props.order.customer?.phone || '';
+    const phone = formatPhoneForWhatsapp(rawPhone);
+    const vehicle = [props.order.year, props.order.make, props.order.model].filter(Boolean).join(' ') || 'Vehicle';
+    const amount = Number(payment.amount || 0).toFixed(2);
+    const method = (payment.method || 'payment').replace('_', ' ').toUpperCase();
+    const refNo = payment.reference || `REC-${payment.id}`;
+    const dateStr = formatDateOnly(payment.payment_date);
+    const balance = Number(props.order.invoice?.balance || 0).toFixed(2);
+
+    let text = `*BUBBLES AUTOS - OFFICIAL PAYMENT RECEIPT*\n\n`;
+    text += `🧾 *Receipt Ref:* ${refNo}\n`;
+    text += `📋 *Order #:* ${props.order.order_number}\n`;
+    text += `🚗 *Vehicle:* ${vehicle}\n`;
+    text += `🔑 *VIN:* ${props.order.vin}\n`;
+    text += `👤 *Customer:* ${props.order.customer?.name || 'Valued Customer'}\n\n`;
+    text += `💵 *Amount Received:* *$${amount}*\n`;
+    text += `📅 *Payment Date:* ${dateStr}\n`;
+    text += `💳 *Payment Method:* ${method}\n`;
+    text += `💰 *Remaining Balance:* $${balance}\n\n`;
+    text += `Thank you for your payment!`;
+
+    const encodedText = encodeURIComponent(text);
+    const url = phone ? `https://wa.me/${phone}?text=${encodedText}` : `https://wa.me/?text=${encodedText}`;
+    window.open(url, '_blank');
+};
+
 // Delete Document Confirm Modal
 const deletingDoc = ref<any>(null);
 const confirmDeleteDoc = () => {
@@ -517,6 +593,7 @@ const formatFileSize = (bytes: number | null | undefined) => {
                             {{ order.order_number }}
                         </span>
                         <AppBadge :status="order.status" size="md" />
+                        <AppBadge v-if="order.invoice?.status" :status="order.invoice.status" size="md" />
                     </div>
 
                     <h1 class="text-xl sm:text-3xl font-black text-white tracking-tight">
@@ -555,6 +632,11 @@ const formatFileSize = (bytes: number | null | undefined) => {
                     >
                         <Sparkles class="w-4 h-4 text-amber-500" />
                         <span>Sync API</span>
+                    </AppButton>
+
+                    <AppButton variant="secondary" size="sm" @click="openTrackingModal" class="rounded-xl font-bold">
+                        <Calendar class="w-4 h-4 text-blue-400" />
+                        <span>Tracking Update</span>
                     </AppButton>
 
                     <AppButton variant="secondary" size="sm" @click="openEditOrderModal" class="rounded-xl font-bold">
@@ -609,14 +691,6 @@ const formatFileSize = (bytes: number | null | undefined) => {
             >
                 <MessageSquare class="w-4 h-4" />
                 <span>Staff Notes ({{ order.notes?.length || 0 }})</span>
-            </button>
-            <button
-                @click="activeTab = 'timeline'"
-                class="px-4 py-2.5 rounded-xl font-extrabold text-xs sm:text-sm transition-all duration-150 flex items-center gap-2 shrink-0 cursor-pointer"
-                :class="activeTab === 'timeline' ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60'"
-            >
-                <Clock class="w-4 h-4" />
-                <span>Audit Timeline</span>
             </button>
         </div>
 
@@ -720,22 +794,50 @@ const formatFileSize = (bytes: number | null | undefined) => {
                     </AppButton>
                 </div>
             </AppCard>
+
+            <!-- Order Audit Trail Timeline Card (Overview Tab) -->
+            <AppCard title="Order Audit Trail Timeline" description="Chronological log of shipment status changes and activities">
+                <div class="space-y-4">
+                    <div v-for="evt in order.timeline_events" :key="evt.id" class="flex gap-4 items-start">
+                        <div class="w-8 h-8 rounded-full bg-blue-50 dark:bg-blue-900/40 text-blue-600 flex items-center justify-center font-bold shrink-0 mt-0.5">
+                            <Clock class="w-4 h-4" />
+                        </div>
+                        <div class="flex-1 p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700/60">
+                            <div class="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">{{ evt.event_type }}</div>
+                            <h4 class="font-bold text-sm text-slate-900 dark:text-white mt-0.5">{{ evt.title }}</h4>
+                            <p class="text-xs text-slate-600 dark:text-slate-400 mt-1">{{ evt.description }}</p>
+                            <span class="text-[11px] text-slate-400 block mt-1">{{ new Date(evt.created_at).toLocaleString() }}</span>
+                        </div>
+                    </div>
+                    <div v-if="!order.timeline_events || order.timeline_events.length === 0" class="text-center py-6 text-slate-400 text-xs italic">
+                        No timeline events recorded yet.
+                    </div>
+                </div>
+            </AppCard>
         </div>
 
         <!-- Tab 2: Financials & Invoice -->
         <div v-if="activeTab === 'financials'" class="space-y-6">
             <AppCard title="Invoice Line Items" description="Itemized billing breakdown (Description & Amount)">
                 <template #headerActions>
-                    <div class="flex items-center gap-3 flex-wrap">
-                        <div class="flex items-center gap-1.5 text-xs font-semibold">
+                    <div class="flex flex-wrap items-center gap-2.5">
+                        <div class="flex items-center gap-1.5 text-xs font-semibold mr-1">
                             <span class="text-slate-400">Payment Status:</span>
                             <AppBadge :status="order.invoice?.status" size="md" />
                         </div>
-                        <AppButton size="sm" variant="outline" @click="showPrintInvoiceModal = true">
-                            <Printer class="w-4 h-4 text-blue-600 dark:text-blue-400" /> Print / Download Invoice
+                        <AppButton size="sm" variant="outline" @click="showPrintInvoiceModal = true" class="rounded-xl font-bold">
+                            <Printer class="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                            <span>Print Invoice</span>
                         </AppButton>
-                        <AppButton size="sm" variant="primary" @click="openAddItemModal">
-                            <Plus class="w-4 h-4" /> Add Item
+                        <AppButton size="sm" variant="secondary" @click="shareInvoiceViaWhatsapp" class="rounded-xl font-bold border-emerald-300 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40">
+                            <svg class="w-4 h-4 fill-current text-emerald-600 dark:text-emerald-400 shrink-0" viewBox="0 0 24 24">
+                                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                            </svg>
+                            <span>WhatsApp Invoice</span>
+                        </AppButton>
+                        <AppButton size="sm" variant="primary" @click="openAddItemModal" class="rounded-xl font-bold">
+                            <Plus class="w-4 h-4" />
+                            <span>Add Item</span>
                         </AppButton>
                     </div>
                 </template>
@@ -796,7 +898,7 @@ const formatFileSize = (bytes: number | null | undefined) => {
             <!-- Partial Payments Log Table -->
             <AppCard title="Partial Payment Log" description="Record of payments received for this vehicle shipment">
                 <template #headerActions>
-                    <AppButton size="sm" variant="primary" @click="showPaymentModal = true">
+                    <AppButton size="sm" variant="primary" @click="showPaymentModal = true" class="rounded-xl font-bold">
                         <DollarSign class="w-4 h-4" /> Record Payment
                     </AppButton>
                 </template>
@@ -832,6 +934,16 @@ const formatFileSize = (bytes: number | null | undefined) => {
                                 </td>
                                 <td class="py-3 px-4 text-right">
                                     <div class="flex items-center justify-end gap-1">
+                                        <!-- Share Receipt via WhatsApp Button -->
+                                        <button
+                                            @click="shareReceiptViaWhatsapp(p)"
+                                            class="text-emerald-600 hover:text-emerald-800 dark:text-emerald-400 p-1.5 rounded-lg hover:bg-emerald-50 dark:hover:bg-emerald-950/40 transition-colors"
+                                            title="Share Payment Receipt via WhatsApp"
+                                        >
+                                            <svg class="w-4 h-4 fill-current text-emerald-600 dark:text-emerald-400" viewBox="0 0 24 24">
+                                                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                                            </svg>
+                                        </button>
                                         <!-- Print Payment Receipt Button -->
                                         <button
                                             @click="openReceiptModal(p)"
@@ -863,7 +975,7 @@ const formatFileSize = (bytes: number | null | undefined) => {
                 description="Vital downloadable shipment records (Bill of Lading, Dock Receipt, Invoice Document) and printable Telex Release messages"
             >
                 <template #headerActions>
-                    <AppButton size="sm" variant="primary" @click="showDocumentModal = true">
+                    <AppButton size="sm" variant="primary" @click="showDocumentModal = true" class="rounded-xl font-bold">
                         <Plus class="w-4 h-4" /> Add / Upload Document
                     </AppButton>
                 </template>
@@ -987,16 +1099,17 @@ const formatFileSize = (bytes: number | null | undefined) => {
                 </div>
                 <div v-else class="space-y-4">
                     <div v-for="em in order.emails" :key="em.id" class="p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-3 shadow-xs">
-                        <div class="flex items-center justify-between text-xs text-slate-400 border-b border-slate-100 dark:border-slate-800 pb-2">
-                            <span>From: <strong class="text-slate-800 dark:text-slate-100">{{ em.sender }}</strong></span>
-                            <div class="flex items-center gap-3">
-                                <span>{{ new Date(em.received_at).toLocaleString() }}</span>
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-slate-400 border-b border-slate-100 dark:border-slate-800 pb-2.5">
+                            <span class="truncate">From: <strong class="text-slate-800 dark:text-slate-100 font-mono">{{ em.sender }}</strong></span>
+                            <div class="flex items-center justify-between sm:justify-end gap-3 shrink-0">
+                                <span class="text-[11px]">{{ new Date(em.received_at).toLocaleString() }}</span>
                                 <button
                                     @click="promptUnlinkEmailFromOrder(em)"
-                                    class="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/40 font-bold px-2 py-0.5 rounded transition-colors cursor-pointer flex items-center gap-1"
+                                    class="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/40 font-extrabold px-2.5 py-1 rounded-lg transition-colors cursor-pointer flex items-center gap-1 shrink-0 bg-red-50/50 dark:bg-red-950/20 border border-red-200/60 dark:border-red-900/40"
                                     title="Unlink this email from order"
                                 >
-                                    <Unlink class="w-3.5 h-3.5" /> Unlink
+                                    <Unlink class="w-3.5 h-3.5" />
+                                    <span>Unlink</span>
                                 </button>
                             </div>
                         </div>
@@ -1062,25 +1175,6 @@ const formatFileSize = (bytes: number | null | undefined) => {
                 </div>
             </AppCard>
         </div>
-
-        <!-- Tab 6: Audit Timeline -->
-        <div v-if="activeTab === 'timeline'" class="space-y-6">
-            <AppCard title="Order Audit Trail Timeline">
-                <div class="space-y-6">
-                    <div v-for="evt in order.timeline_events" :key="evt.id" class="flex gap-4 items-start">
-                        <div class="w-8 h-8 rounded-full bg-blue-50 dark:bg-blue-900/40 text-blue-600 flex items-center justify-center font-bold shrink-0 mt-0.5">
-                            <Clock class="w-4 h-4" />
-                        </div>
-                        <div class="flex-1 p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700/60">
-                            <div class="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">{{ evt.event_type }}</div>
-                            <h4 class="font-bold text-sm text-slate-900 dark:text-white mt-0.5">{{ evt.title }}</h4>
-                            <p class="text-xs text-slate-600 dark:text-slate-400 mt-1">{{ evt.description }}</p>
-                            <span class="text-[11px] text-slate-400 block mt-1">{{ new Date(evt.created_at).toLocaleString() }}</span>
-                        </div>
-                    </div>
-                </div>
-            </AppCard>
-        </div>
     </div>
 
     <!-- Update Tracking & Expected Delivery Modal -->
@@ -1114,6 +1208,16 @@ const formatFileSize = (bytes: number | null | undefined) => {
     <!-- Add / Edit Invoice Line Item Modal -->
     <AppModal :show="showItemModal" :title="editingItem ? 'Edit Invoice Line Item' : 'Add Invoice Line Item'" @close="showItemModal = false">
         <form @submit.prevent="submitItemForm" class="space-y-4">
+            <!-- Preset Item Selector Dropdown -->
+            <AppFormField v-if="!editingItem && props.invoiceItemTemplates && props.invoiceItemTemplates.length > 0" label="Select Preset Invoice Item (Optional)">
+                <AppSelect
+                    :modelValue="selectedTemplateId"
+                    @update:modelValue="onPresetTemplateSelected"
+                    :options="props.invoiceItemTemplates.map(t => ({ value: t.id, label: `${t.description} ($${Number(t.default_amount).toFixed(2)})` }))"
+                    placeholder="Choose from standardized invoice items catalog..."
+                />
+            </AppFormField>
+
             <AppFormField label="Item Description" required :error="itemForm.errors.description">
                 <AppInput v-model="itemForm.description" placeholder="e.g. Vehicle Shipping Fee - Houston to Lagos" />
             </AppFormField>
@@ -1425,8 +1529,14 @@ const formatFileSize = (bytes: number | null | undefined) => {
             </div>
 
             <!-- Modal Action Buttons -->
-            <div class="flex justify-end gap-3 print:hidden">
+            <div class="flex flex-wrap justify-end gap-3 print:hidden">
                 <AppButton variant="outline" @click="showPrintInvoiceModal = false">Close</AppButton>
+                <AppButton variant="secondary" @click="shareInvoiceViaWhatsapp" class="rounded-xl font-bold bg-emerald-600 hover:bg-emerald-500 text-white">
+                    <svg class="w-4 h-4 fill-current text-white shrink-0" viewBox="0 0 24 24">
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                    </svg>
+                    <span>WhatsApp Invoice</span>
+                </AppButton>
                 <AppButton variant="primary" @click="printInvoice">
                     <Printer class="w-4 h-4" /> Print / Save PDF
                 </AppButton>
@@ -1483,8 +1593,14 @@ const formatFileSize = (bytes: number | null | undefined) => {
                 </div>
             </div>
 
-            <div class="flex justify-end gap-3 print:hidden">
+            <div class="flex flex-wrap justify-end gap-3 print:hidden">
                 <AppButton variant="outline" @click="closeReceiptModal">Close</AppButton>
+                <AppButton variant="secondary" @click="shareReceiptViaWhatsapp(printingPayment)" class="rounded-xl font-bold bg-emerald-600 hover:bg-emerald-500 text-white">
+                    <svg class="w-4 h-4 fill-current text-white shrink-0" viewBox="0 0 24 24">
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                    </svg>
+                    <span>WhatsApp Receipt</span>
+                </AppButton>
                 <AppButton variant="primary" @click="printPaymentReceipt">
                     <Printer class="w-4 h-4" /> Print Receipt
                 </AppButton>

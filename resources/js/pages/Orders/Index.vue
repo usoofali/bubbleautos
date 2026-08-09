@@ -145,8 +145,8 @@ const confirmDeleteOrder = () => {
             :columns="[
                 { key: 'order_number', label: 'Order #' },
                 { key: 'vin', label: 'VIN / Vehicle Specs' },
-                { key: 'customer', label: 'Customer Details' },
-                { key: 'destination', label: 'Destination / Line' },
+                { key: 'customer', label: 'Customer' },
+                { key: 'destination', label: 'Destination' },
                 { key: 'status', label: 'Status' },
                 { key: 'actions', label: 'Actions', align: 'right' },
             ]"
@@ -156,29 +156,29 @@ const confirmDeleteOrder = () => {
         >
             <template #rows="{ items }">
                 <tr v-for="ord in items" :key="ord.id" class="hover:bg-blue-50/40 dark:hover:bg-blue-950/30 transition-colors">
-                    <td class="px-6 py-4 font-black text-blue-600 dark:text-blue-400">
-                        <Link :href="`/orders/${ord.id}`" class="hover:underline">{{ ord.order_number }}</Link>
+                    <td class="px-4 sm:px-6 py-4 font-black text-blue-600 dark:text-blue-400 whitespace-nowrap min-w-[120px]">
+                        <Link :href="`/orders/${ord.id}`" class="hover:underline font-mono tracking-tight shrink-0 whitespace-nowrap">{{ ord.order_number }}</Link>
                     </td>
-                    <td class="px-6 py-4">
-                        <div class="font-mono text-xs font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wide">{{ ord.vin }}</div>
-                        <div class="text-xs text-slate-400 font-medium">
+                    <td class="px-4 sm:px-6 py-4 min-w-[180px]">
+                        <div class="font-mono text-xs font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wide whitespace-nowrap">{{ ord.vin }}</div>
+                        <div class="text-xs text-slate-400 font-medium whitespace-nowrap">
                             <span v-if="ord.make || ord.model">{{ ord.year ? ord.year + ' ' : '' }}{{ ord.make }} {{ ord.model }}</span>
                             <span v-else class="italic text-slate-400">Pending API Lookup</span>
                         </div>
                     </td>
-                    <td class="px-6 py-4">
-                        <div class="font-extrabold text-slate-900 dark:text-white text-xs">{{ ord.customer?.name || 'N/A' }}</div>
-                        <div class="text-xs text-slate-400 font-mono">{{ ord.customer?.phone }}</div>
+                    <td class="px-4 sm:px-6 py-4 min-w-[140px]">
+                        <div class="font-extrabold text-slate-900 dark:text-white text-xs whitespace-nowrap">{{ ord.customer?.name || 'N/A' }}</div>
+                        <div class="text-xs text-slate-400 font-mono whitespace-nowrap">{{ ord.customer?.phone }}</div>
                     </td>
-                    <td class="px-6 py-4">
-                        <div class="text-xs font-bold text-slate-700 dark:text-slate-300">{{ ord.destination || 'Pending Sync' }}</div>
-                        <div class="text-xs text-slate-400 font-medium">{{ ord.shipping_line || 'Pending Line' }}</div>
+                    <td class="px-4 sm:px-6 py-4 min-w-[150px]">
+                        <div class="text-xs font-bold text-slate-700 dark:text-slate-300 whitespace-nowrap">{{ ord.destination || 'Pending Sync' }}</div>
+                        <div class="text-xs text-slate-400 font-medium whitespace-nowrap">{{ ord.shipping_line || 'Pending Line' }}</div>
                     </td>
-                    <td class="px-6 py-4">
+                    <td class="px-4 sm:px-6 py-4 min-w-[120px]">
                         <AppBadge :status="ord.status" size="sm" />
                     </td>
-                    <td class="px-6 py-4 text-right">
-                        <div class="flex items-center justify-end gap-2">
+                    <td class="px-4 sm:px-6 py-4 text-right min-w-[110px]">
+                        <div class="flex items-center justify-end gap-2 whitespace-nowrap">
                             <Link
                                 :href="`/orders/${ord.id}`"
                                 class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-extrabold text-xs bg-blue-600 hover:bg-blue-500 text-white shadow-xs active:scale-95 transition-all shrink-0"
@@ -189,7 +189,7 @@ const confirmDeleteOrder = () => {
                             <button
                                 v-if="$page.props.auth.user.is_admin"
                                 @click="deletingOrder = ord"
-                                class="p-1.5 text-slate-400 hover:text-red-600 rounded-xl hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors"
+                                class="p-1.5 text-slate-400 hover:text-red-600 rounded-xl hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors shrink-0"
                                 title="Delete Order"
                             >
                                 <Trash2 class="w-4 h-4" />

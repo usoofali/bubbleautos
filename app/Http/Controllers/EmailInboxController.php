@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\DocumentType;
 use App\Enums\EmailStatus;
 use App\Enums\ShipmentStatus;
 use App\Models\Email;
@@ -51,6 +52,10 @@ class EmailInboxController extends Controller
                 'value' => $s->value,
                 'label' => $s->label(),
             ], ShipmentStatus::cases()),
+            'documentTypeOptions' => array_map(fn ($d) => [
+                'value' => $d->value,
+                'label' => $d->label(),
+            ], DocumentType::cases()),
             'filters' => [
                 'status' => $status,
                 'search' => $search,
@@ -63,13 +68,19 @@ class EmailInboxController extends Controller
         $validated = $request->validate([
             'order_id' => 'required|exists:orders,id',
             'status' => 'nullable|string',
+            'attachment_document_types' => 'nullable|array',
+            'attachment_document_types.*' => 'nullable|string',
         ]);
 
         $order = Order::findOrFail($validated['order_id']);
 
         $this->authorize('update', $order);
 
-        $this->emailProcessingService->linkToOrder($email, $order);
+        $this->emailProcessingService->linkToOrder(
+            $email,
+            $order,
+            $validated['attachment_document_types'] ?? []
+        );
 
         if (! empty($validated['status'])) {
             app(OrderService::class)->updateStatus(

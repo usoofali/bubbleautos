@@ -46,39 +46,54 @@ class EmailFetchService
 
         // 2. Fallback / Simulated fetch for operations@ankshipping.com if offline or test env
         $testVins = Order::pluck('vin')->toArray();
-        $vinToUse = ! empty($testVins) ? $testVins[array_rand($testVins)] : '1FA6P8CF0H5123456';
 
-        $sampleEmails = [
-            [
+        $sampleEmails = [];
+        foreach ($testVins as $vin) {
+            $sampleEmails[] = [
                 'sender' => $targetEmail,
                 'recipient' => 'shipping@bubbleautos.com',
-                'subject' => "ANK Shipping Manifest & Dock Receipt - VIN {$vinToUse}",
-                'body' => "<div style='font-family: sans-serif; line-height: 1.6; color: #1e293b;'><h3 style='color: #2563eb; margin-bottom: 8px;'>ANK Shipping Lines - Official Manifest Notice</h3><p>Dear Bubble Autos Staff,</p><p>Vehicle with <strong>VIN {$vinToUse}</strong> has been processed at Houston Terminal. Port Gate-in confirmed and vessel loading is scheduled.</p><div style='padding: 12px; background-color: #f1f5f9; border-radius: 8px; font-size: 13px;'><strong>Status:</strong> GATE_IN_READY<br><strong>Location:</strong> Port of Houston, Dock 4<br><strong>Vessel:</strong> Sallaum Express V-902</div><p style='margin-top: 12px;'>Please find the attached Dock Receipt PDF document for export compliance clearance.</p></div>",
-                'message_id' => 'ANK-MSG-'.uniqid(),
+                'subject' => "ANK Shipping Manifest & Dock Receipt - VIN {$vin}",
+                'body' => "<div style='font-family: sans-serif; line-height: 1.6; color: #1e293b;'><h3 style='color: #2563eb; margin-bottom: 8px;'>ANK Shipping Lines - Official Manifest Notice</h3><p>Dear Bubble Autos Staff,</p><p>Vehicle with <strong>VIN {$vin}</strong> has been processed at Houston Terminal. Port Gate-in confirmed and vessel loading is scheduled.</p><div style='padding: 12px; background-color: #f1f5f9; border-radius: 8px; font-size: 13px;'><strong>Status:</strong> GATE_IN_READY<br><strong>Location:</strong> Port of Houston, Dock 4<br><strong>Vessel:</strong> Sallaum Express V-902</div><p style='margin-top: 12px;'>Please find the attached Dock Receipt PDF document for export compliance clearance.</p></div>",
+                'message_id' => "ANK-MANIFEST-{$vin}",
                 'attachments' => [
-                    ['filename' => "ANK_DockReceipt_{$vinToUse}.pdf", 'file_size' => 185000, 'mime_type' => 'application/pdf'],
+                    ['filename' => "ANK_DockReceipt_{$vin}.pdf", 'file_size' => 185000, 'mime_type' => 'application/pdf'],
                 ],
-            ],
-            [
+            ];
+            $sampleEmails[] = [
                 'sender' => $targetEmail,
                 'recipient' => 'shipping@bubbleautos.com',
-                'subject' => "Customs Title Clearance Confirmed - VIN {$vinToUse}",
-                'body' => "<div style='font-family: sans-serif; line-height: 1.6; color: #1e293b;'><h3 style='color: #059669; margin-bottom: 8px;'>US Customs & Border Protection - Title Stamp Clearance</h3><p>ANK Shipping Operations Notice: Customs clearance title validation is complete for vehicle <strong>VIN {$vinToUse}</strong>.</p><p style='padding: 12px; background-color: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; font-size: 13px; color: #065f46;'><strong>Title Status:</strong> CLEARED & STAMPED FOR EXPORT<br><strong>Release Date:</strong> ".now()->toFormattedDateString().'</p><p>Customs title clearance verification document attached below.</p></div>',
-                'message_id' => 'ANK-MSG-'.uniqid(),
+                'subject' => "Customs Title Clearance Confirmed - VIN {$vin}",
+                'body' => "<div style='font-family: sans-serif; line-height: 1.6; color: #1e293b;'><h3 style='color: #059669; margin-bottom: 8px;'>US Customs & Border Protection - Title Stamp Clearance</h3><p>ANK Shipping Operations Notice: Customs clearance title validation is complete for vehicle <strong>VIN {$vin}</strong>.</p><p style='padding: 12px; background-color: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; font-size: 13px; color: #065f46;'><strong>Title Status:</strong> CLEARED & STAMPED FOR EXPORT<br><strong>Release Date:</strong> ".now()->toFormattedDateString().'</p><p>Customs title clearance verification document attached below.</p></div>',
+                'message_id' => "ANK-CUSTOMS-{$vin}",
                 'attachments' => [
-                    ['filename' => "ANK_CustomsTitle_{$vinToUse}.pdf", 'file_size' => 240000, 'mime_type' => 'application/pdf'],
+                    ['filename' => "ANK_CustomsTitle_{$vin}.pdf", 'file_size' => 240000, 'mime_type' => 'application/pdf'],
                 ],
-            ],
-        ];
+            ];
+        }
 
-        $picked = $sampleEmails[array_rand($sampleEmails)];
-        $email = $this->emailProcessingService->processIncomingEmail($picked);
+        $newEmails = [];
+        foreach ($sampleEmails as $sample) {
+            if (! Email::where('message_id', $sample['message_id'])->exists()) {
+                $email = $this->emailProcessingService->processIncomingEmail($sample);
+                $newEmails[] = $email;
+                break; // Process one new email per sync iteration
+            }
+        }
+
+        if (empty($newEmails)) {
+            return [
+                'count' => 0,
+                'emails' => [],
+                'target_email' => $targetEmail,
+                'message' => "Inbox is up to date for {$targetEmail}. No new emails found.",
+            ];
+        }
 
         return [
-            'count' => 1,
-            'emails' => [$email],
+            'count' => count($newEmails),
+            'emails' => $newEmails,
             'target_email' => $targetEmail,
-            'message' => "Synced shipping email from {$targetEmail} successfully.",
+            'message' => 'Synced '.count($newEmails)." new shipping email from {$targetEmail} successfully.",
         ];
     }
 

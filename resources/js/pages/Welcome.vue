@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch, onMounted } from 'vue';
 import { Head, Link } from '@inertiajs/vue3';
 import { 
     Car, 
@@ -19,7 +19,8 @@ import {
     Sparkles, 
     Check,
     Sun,
-    Moon
+    Moon,
+    AlertCircle
 } from '@lucide/vue';
 import AppLogo from '@/components/AppLogo.vue';
 import { useAppearance } from '@/composables/useAppearance';
@@ -51,8 +52,9 @@ function toggleNextTheme() {
 }
 
 // Interactive VIN Search Demo State
-const demoVinInput = ref('1G1YY221165103456');
+const demoVinInput = ref('');
 const isSearching = ref(false);
+const searchMessage = ref('');
 const demoResult = ref<{
     vin: string;
     orderNo: string;
@@ -61,66 +63,61 @@ const demoResult = ref<{
     eta: string;
     location: string;
     titleStatus: string;
-} | null>({
-    vin: '1G1YY221165103456',
-    orderNo: 'BO-2026-9042',
-    vehicle: '2023 Chevrolet Corvette Stingray Z51',
-    status: 'In Transit - Ocean Vessel',
-    eta: 'Aug 14, 2026',
-    location: 'Port of Savannah -> Dubai Jebel Ali',
-    titleStatus: 'Verified in Digital Vault',
+    pictures?: string[];
+} | null>(null);
+
+let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+
+async function performLookup(query: string) {
+    const trimmed = query.trim();
+    if (!trimmed || trimmed.length < 6) {
+        demoResult.value = null;
+        searchMessage.value = trimmed.length > 0 ? 'Type at least 6 digits of VIN to auto-lookup...' : '';
+        return;
+    }
+
+    isSearching.value = true;
+    searchMessage.value = '';
+
+    try {
+        const response = await fetch(`/api/public/vin-lookup?q=${encodeURIComponent(trimmed)}`);
+        const data = await response.json();
+        if (data.found && data.result) {
+            demoResult.value = data.result;
+            searchMessage.value = '';
+        } else {
+            demoResult.value = null;
+            searchMessage.value = data.message || `No vehicle order matching '${trimmed}' found in system.`;
+        }
+    } catch (err) {
+        demoResult.value = null;
+        searchMessage.value = 'Lookup temporarily unavailable.';
+    } finally {
+        isSearching.value = false;
+    }
+}
+
+watch(demoVinInput, (newVal) => {
+    if (debounceTimer) clearTimeout(debounceTimer);
+    if (newVal.trim().length >= 6) {
+        debounceTimer = setTimeout(() => {
+            performLookup(newVal);
+        }, 250);
+    } else {
+        demoResult.value = null;
+        searchMessage.value = newVal.trim().length > 0 ? 'Type at least 6 digits to auto-lookup...' : '';
+    }
 });
 
-const sampleVins = [
-    { label: 'Corvette Stingray', vin: '1G1YY221165103456' },
-    { label: 'Ford Mustang GT', vin: '1FA6P8CF5H5501290' },
-    { label: 'BMW M4 Competition', vin: 'WBS33AY050FP99182' },
-];
-
-function triggerDemoSearch(vinToSearch?: string) {
-    if (vinToSearch) {
-        demoVinInput.value = vinToSearch;
+onMounted(() => {
+    if (demoVinInput.value.length >= 6) {
+        performLookup(demoVinInput.value);
     }
-    isSearching.value = true;
-    setTimeout(() => {
-        isSearching.value = false;
-        if (demoVinInput.value.includes('1FA') || demoVinInput.value.toLowerCase().includes('mustang')) {
-            demoResult.value = {
-                vin: '1FA6P8CF5H5501290',
-                orderNo: 'BO-2026-7718',
-                vehicle: '2024 Ford Mustang GT Premium',
-                status: 'Port Yard Ready for Loading',
-                eta: 'Aug 18, 2026',
-                location: 'Port of Newark (EFX Terminal)',
-                titleStatus: 'Dock Receipt Attached',
-            };
-        } else if (demoVinInput.value.includes('WBS') || demoVinInput.value.toLowerCase().includes('bmw')) {
-            demoResult.value = {
-                vin: 'WBS33AY050FP99182',
-                orderNo: 'BO-2026-6631',
-                vehicle: '2023 BMW M4 Competition Coupe',
-                status: 'Customs Cleared',
-                eta: 'Delivered',
-                location: 'Container Yard - Section B4',
-                titleStatus: 'Original Title Dispatched',
-            };
-        } else {
-            demoResult.value = {
-                vin: demoVinInput.value.toUpperCase() || '1G1YY221165103456',
-                orderNo: 'BO-2026-9042',
-                vehicle: '2023 Chevrolet Corvette Stingray Z51',
-                status: 'In Transit - Ocean Vessel',
-                eta: 'Aug 14, 2026',
-                location: 'Port of Savannah -> Dubai Jebel Ali',
-                titleStatus: 'Verified in Digital Vault',
-            };
-        }
-    }, 400);
-}
+});
 </script>
 
 <template>
-    <Head title="Bubbles Autos - Vehicle Shipping & Operations Management Platform" />
+    <Head title="Bubbles Autos - Vehicle Order & Operations Management Platform" />
 
     <div class="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col selection:bg-blue-600 selection:text-white font-sans relative overflow-hidden transition-colors duration-300">
         <!-- Textured Grid & Matrix Pattern -->
@@ -170,94 +167,62 @@ function triggerDemoSearch(vinToSearch?: string) {
                         class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 sm:px-5 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm bg-blue-600 hover:bg-blue-500 active:scale-[0.98] text-white shadow-md sm:shadow-lg shadow-blue-600/30 transition-all duration-150 shrink-0 whitespace-nowrap"
                     >
                         <Lock class="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
-                        <span>Staff Login</span>
+                        <span>Login</span>
                     </Link>
                 </div>
             </div>
         </header>
 
         <!-- Hero Section -->
-        <section class="relative py-16 lg:py-24 overflow-hidden">
+        <section class="relative py-12 lg:py-16 overflow-hidden">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
                 <!-- Hero Badge -->
-                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/70 border border-blue-200 dark:border-blue-800/60 text-blue-700 dark:text-blue-400 text-xs font-bold uppercase tracking-wider mb-8 shadow-xs">
+                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/70 border border-blue-200 dark:border-blue-800/60 text-blue-700 dark:text-blue-400 text-xs font-bold uppercase tracking-wider mb-6 shadow-xs">
                     <Sparkles class="w-3.5 h-3.5" />
                     <span>Next-Gen Vehicle Shipment & Logistics Intelligence</span>
                 </div>
 
                 <!-- Hero Title -->
-                <h1 class="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-slate-900 dark:text-white max-w-5xl mx-auto leading-[1.1] mb-6">
+                <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-slate-900 dark:text-white max-w-5xl mx-auto leading-[1.1] mb-5">
                     {{ cms.hero_title || 'Streamlined Vehicle Shipment & Inventory Control' }}
                 </h1>
 
                 <!-- Hero Subtitle -->
-                <p class="text-lg sm:text-xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto leading-relaxed mb-10">
+                <p class="text-base sm:text-lg text-slate-600 dark:text-slate-400 max-w-3xl mx-auto leading-relaxed mb-10">
                     {{ cms.hero_subtitle || 'Sub-second VIN search, automated financial line items, dock receipt tracking, and immutable document vaults engineered for high-volume auto export operations.' }}
                 </p>
 
-                <!-- Hero CTA & Quick Actions -->
-                <div class="flex flex-wrap items-center justify-center gap-4 mb-16">
-                    <Link
-                        href="/login"
-                        class="inline-flex items-center gap-2.5 px-8 py-4 rounded-2xl font-extrabold text-base bg-blue-600 hover:bg-blue-500 text-white shadow-xl shadow-blue-600/30 active:scale-[0.98] transition-all duration-150 group"
-                    >
-                        <Car class="w-5 h-5" />
-                        <span>Access Operations Portal</span>
-                        <ArrowRight class="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                    </Link>
-                </div>
-
                 <!-- Interactive Live Demo Widget -->
-                <div class="max-w-4xl mx-auto bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl border border-slate-200/90 dark:border-slate-800/90 rounded-3xl p-6 sm:p-8 shadow-xl dark:shadow-2xl dark:shadow-slate-950/80 text-left transition-colors">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-6 border-b border-slate-200 dark:border-slate-800/80">
+                <div class="max-w-3xl mx-auto bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl border border-slate-200/90 dark:border-slate-800/90 rounded-3xl p-6 sm:p-8 shadow-xl dark:shadow-2xl dark:shadow-slate-950/80 text-left transition-colors">
+                    <div class="flex items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-200 dark:border-slate-800/80">
                         <div>
                             <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
                                 <Zap class="w-4 h-4 text-blue-600 dark:text-blue-400" />
                                 <span>Live Interactive Feature Preview</span>
                             </div>
-                            <h3 class="text-lg font-bold text-slate-900 dark:text-white mt-1">Instant 17-Character VIN & Order Lookup</h3>
-                        </div>
-                        <div class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-                            <span>Try example:</span>
-                            <button
-                                v-for="sample in sampleVins"
-                                :key="sample.vin"
-                                @click="triggerDemoSearch(sample.vin)"
-                                class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-medium text-[11px] transition-colors border border-slate-200 dark:border-slate-700/60"
-                            >
-                                {{ sample.label }}
-                            </button>
+                            <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white mt-1">Automatic VIN & Order Lookup</h3>
                         </div>
                     </div>
 
-                    <!-- Search Input Bar -->
-                    <div class="flex flex-col sm:flex-row items-center gap-3 mb-6">
-                        <div class="relative w-full">
-                            <Search class="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                            <input
-                                v-model="demoVinInput"
-                                @keyup.enter="triggerDemoSearch()"
-                                type="text"
-                                placeholder="Enter 17-character VIN (e.g. 1G1YY221165103456) or Bubble Order #"
-                                class="w-full pl-12 pr-4 py-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 text-sm font-mono focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
-                            />
+                    <!-- Search Input Bar (Auto-triggers on typing 6+ characters) -->
+                    <div class="relative w-full mb-6">
+                        <Search class="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                        <input
+                            v-model="demoVinInput"
+                            type="text"
+                            placeholder="e.g. Enter last 6 VIN (e.g. 5123456)"
+                            class="w-full pl-12 pr-10 py-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 text-sm font-mono focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                        />
+                        <div v-if="isSearching" class="absolute right-4 top-1/2 -translate-y-1/2">
+                            <span class="w-4 h-4 border-2 border-blue-600/30 border-t-blue-600 rounded-full animate-spin block"></span>
                         </div>
-                        <button
-                            @click="triggerDemoSearch()"
-                            :disabled="isSearching"
-                            class="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm shadow-md shadow-blue-600/20 shrink-0 transition-all flex items-center justify-center gap-2"
-                        >
-                            <span v-if="isSearching" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                            <Search v-else class="w-4 h-4" />
-                            <span>Lookup</span>
-                        </button>
                     </div>
 
-                    <!-- Search Result Preview Card -->
-                    <div v-if="demoResult" class="p-5 rounded-2xl bg-slate-50/80 dark:bg-slate-950/70 border border-slate-200/80 dark:border-slate-800/80 transition-all">
-                        <div class="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-200 dark:border-slate-800/60">
+                    <!-- Search Result Preview Card (Real Database Match) -->
+                    <div v-if="demoResult" class="p-5 rounded-2xl bg-slate-50/80 dark:bg-slate-950/70 border border-slate-200/80 dark:border-slate-800/80 transition-all space-y-4">
+                        <div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-200 dark:border-slate-800/60">
                             <div>
-                                <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Vehicle Identified</div>
+                                <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Vehicle Identified</div>
                                 <div class="text-base font-extrabold text-slate-900 dark:text-white">{{ demoResult.vehicle }}</div>
                             </div>
                             <div class="flex items-center gap-2">
@@ -282,13 +247,40 @@ function triggerDemoSearch(vinToSearch?: string) {
                                 <span class="text-slate-800 dark:text-slate-200 font-medium truncate block">{{ demoResult.location }}</span>
                             </div>
                             <div>
-                                <span class="text-slate-500 block">Title Vault Status</span>
-                                <span class="text-amber-600 dark:text-amber-400 font-semibold flex items-center gap-1">
-                                    <ShieldCheck class="w-3.5 h-3.5" />
-                                    {{ demoResult.titleStatus }}
-                                </span>
+                                <span class="text-slate-500 block">Expected ETA</span>
+                                <span class="text-blue-600 dark:text-blue-400 font-bold block">{{ demoResult.eta }}</span>
                             </div>
                         </div>
+
+                        <div class="pt-2 border-t border-slate-200/60 dark:border-slate-800/40 text-xs text-slate-600 dark:text-slate-400 flex items-center gap-1.5">
+                            <ShieldCheck class="w-4 h-4 text-emerald-500 shrink-0" />
+                            <span>{{ demoResult.titleStatus }}</span>
+                        </div>
+
+                        <!-- Vehicle Photos Gallery (if present) -->
+                        <div v-if="demoResult.pictures && demoResult.pictures.length > 0" class="pt-3 border-t border-slate-200/60 dark:border-slate-800/40 space-y-2">
+                            <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between">
+                                <span>Vehicle Photos ({{ demoResult.pictures.length }})</span>
+                            </div>
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                                <a
+                                    v-for="(pic, idx) in demoResult.pictures"
+                                    :key="idx"
+                                    :href="pic"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    class="group relative aspect-4/3 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xs hover:border-blue-500/60 transition-all"
+                                >
+                                    <img :src="pic" :alt="demoResult.vehicle" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- No Result / Helper Message State -->
+                    <div v-else-if="searchMessage" class="p-4 rounded-2xl bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200/60 dark:border-amber-900/40 flex items-center gap-3 text-xs font-medium text-amber-800 dark:text-amber-300">
+                        <AlertCircle class="w-4 h-4 shrink-0 text-amber-600 dark:text-amber-400" />
+                        <span>{{ searchMessage }}</span>
                     </div>
                 </div>
             </div>
@@ -351,43 +343,17 @@ function triggerDemoSearch(vinToSearch?: string) {
             </div>
         </section>
 
-        <!-- Stats & Infrastructure Section -->
-        <section class="py-20 bg-white dark:bg-slate-950 transition-colors">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-                    <div class="p-8 rounded-3xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200/80 dark:border-slate-800/80 transition-colors">
-                        <div class="text-4xl sm:text-5xl font-black text-blue-600 dark:text-blue-400 mb-1">100%</div>
-                        <div class="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">VIN Lookup Accuracy</div>
-                    </div>
-                    <div class="p-8 rounded-3xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200/80 dark:border-slate-800/80 transition-colors">
-                        <div class="text-4xl sm:text-5xl font-black text-slate-900 dark:text-white mb-1">&lt; 100ms</div>
-                        <div class="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">Query Response Time</div>
-                    </div>
-                    <div class="p-8 rounded-3xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200/80 dark:border-slate-800/80 transition-colors">
-                        <div class="text-4xl sm:text-5xl font-black text-amber-600 dark:text-amber-400 mb-1">Zero</div>
-                        <div class="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">Paper Bottlenecks</div>
-                    </div>
-                    <div class="p-8 rounded-3xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200/80 dark:border-slate-800/80 transition-colors">
-                        <div class="text-4xl sm:text-5xl font-black text-emerald-600 dark:text-emerald-400 mb-1">24/7</div>
-                        <div class="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">Email Manifest Parsing</div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Contact & Enterprise Footer -->
-        <footer class="mt-auto border-t border-slate-200 dark:border-slate-800/80 bg-slate-50 dark:bg-slate-950 py-12 transition-colors">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+        <!-- Footer -->
+        <footer class="bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 py-12 text-slate-600 dark:text-slate-400 text-sm transition-colors mt-auto">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
+                <div class="flex items-center gap-3">
                     <AppLogo />
-                    <div class="flex flex-wrap items-center justify-center gap-6 text-xs text-slate-600 dark:text-slate-400">
-                        <span class="flex items-center gap-2"><Phone class="w-4 h-4 text-blue-600 dark:text-blue-400" /> {{ cms.contact_phone }}</span>
-                        <span class="flex items-center gap-2"><Mail class="w-4 h-4 text-blue-600 dark:text-blue-400" /> {{ cms.contact_email }}</span>
-                        <span class="flex items-center gap-2"><MapPin class="w-4 h-4 text-blue-600 dark:text-blue-400" /> {{ cms.contact_address }}</span>
-                    </div>
+                    <span class="text-xs text-slate-500 font-medium">© {{ new Date().getFullYear() }} {{ cms.company_name }}. All rights reserved.</span>
                 </div>
-                <div class="mt-8 pt-6 border-t border-slate-200 dark:border-slate-800/60 text-center text-xs text-slate-500 dark:text-slate-400">
-                    &copy; {{ new Date().getFullYear() }} {{ cms.company_name }}. Internal Management Platform. All rights reserved.
+                <div class="flex flex-wrap items-center justify-center gap-6 text-xs font-semibold text-slate-600 dark:text-slate-400">
+                    <span class="flex items-center gap-1.5"><Phone class="w-3.5 h-3.5 text-blue-500" /> {{ cms.contact_phone }}</span>
+                    <span class="flex items-center gap-1.5"><Mail class="w-3.5 h-3.5 text-blue-500" /> {{ cms.contact_email }}</span>
+                    <span class="flex items-center gap-1.5"><MapPin class="w-3.5 h-3.5 text-blue-500" /> {{ cms.contact_address }}</span>
                 </div>
             </div>
         </footer>

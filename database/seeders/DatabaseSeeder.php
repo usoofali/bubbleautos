@@ -105,25 +105,11 @@ class DatabaseSeeder extends Seeder
             ->toArray();
         $staffRole->permissions()->sync($staffPermIds);
 
-        // 3. Demo Users
+        // 3. System Admin User
         $admin = User::firstOrCreate(['email' => 'admin@bubbleautos.com'], [
             'name' => 'System Admin',
             'password' => Hash::make('password'),
             'role_id' => $adminRole->id,
-            'is_active' => true,
-        ]);
-
-        $manager = User::firstOrCreate(['email' => 'manager@bubbleautos.com'], [
-            'name' => 'Operations Manager',
-            'password' => Hash::make('password'),
-            'role_id' => $managerRole->id,
-            'is_active' => true,
-        ]);
-
-        $staff = User::firstOrCreate(['email' => 'staff@bubbleautos.com'], [
-            'name' => 'Front Desk Staff',
-            'password' => Hash::make('password'),
-            'role_id' => $staffRole->id,
             'is_active' => true,
         ]);
 
@@ -144,7 +130,41 @@ class DatabaseSeeder extends Seeder
         Setting::set('contact_email', 'contact@bubbleautos.com', 'website');
         Setting::set('contact_address', '100 Shipping Way, Houston, TX 77001', 'website');
 
-        // 5. Customers
+        // Default Preset Invoice Item Catalog
+        $defaultTemplates = [
+            ['description' => 'Ocean Freight Shipping Charge', 'default_amount' => 1450.00],
+            ['description' => 'Port Handling & Dock Documentation Fee', 'default_amount' => 250.00],
+            ['description' => 'Customs Title Clearance', 'default_amount' => 150.00],
+            ['description' => 'Container Loading & Strapping Fee', 'default_amount' => 300.00],
+            ['description' => 'Local Towing & Drayage Fee', 'default_amount' => 200.00],
+            ['description' => 'Storage & Gate Pass Fee', 'default_amount' => 100.00],
+            ['description' => 'Telex Release & Express Courier Fee', 'default_amount' => 75.00],
+        ];
+        foreach ($defaultTemplates as $tmpl) {
+            \App\Models\InvoiceItemTemplate::firstOrCreate(['description' => $tmpl['description']], $tmpl);
+        }
+
+        // Exit early if running in production environment
+        if (app()->environment('production')) {
+            return;
+        }
+
+        // 5. Demo Users (Non-Production)
+        $manager = User::firstOrCreate(['email' => 'manager@bubbleautos.com'], [
+            'name' => 'Operations Manager',
+            'password' => Hash::make('password'),
+            'role_id' => $managerRole->id,
+            'is_active' => true,
+        ]);
+
+        $staff = User::firstOrCreate(['email' => 'staff@bubbleautos.com'], [
+            'name' => 'Front Desk Staff',
+            'password' => Hash::make('password'),
+            'role_id' => $staffRole->id,
+            'is_active' => true,
+        ]);
+
+        // 6. Customers
         $c1 = Customer::firstOrCreate(['email' => 'johndoe@example.com'], [
             'name' => 'John Doe',
             'phone' => '+1 555-0192',
@@ -175,6 +195,12 @@ class DatabaseSeeder extends Seeder
             'destination' => 'Lagos, Nigeria',
             'status' => ShipmentStatus::IN_TRANSIT,
             'expected_arrival' => now()->addDays(14),
+            'pictures' => [
+                'https://cs.copart.com/v1/AUTH_svc/images/pix/20220815/61928371_1X.JPG',
+                'https://cs.copart.com/v1/AUTH_svc/images/pix/20220815/61928371_2X.JPG',
+                'https://cs.copart.com/v1/AUTH_svc/images/pix/20220815/61928371_3X.JPG',
+                'https://cs.copart.com/v1/AUTH_svc/images/pix/20220815/61928371_4X.JPG',
+            ],
         ]);
 
         $inv1 = Invoice::firstOrCreate(['invoice_number' => 'INV-00001'], [

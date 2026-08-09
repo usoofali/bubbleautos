@@ -65,3 +65,54 @@ test('staff can manually link an unassigned email to an order via route without 
     expect($email->order_id)->toBe($order->id);
     expect($email->processing_status->value)->toBe('matched');
 });
+
+test('staff can link an email with attachments and automatically import selected files as Order Documents', function () {
+    $adminRole = Role::create(['name' => 'Administrator', 'slug' => 'admin']);
+    $user = User::factory()->create(['role_id' => $adminRole->id]);
+
+    $customer = Customer::create(['name' => 'Attachment Customer', 'phone' => '+1 555-8888']);
+
+    $orderService = new OrderService;
+    $order = $orderService->createOrder([
+        'customer_id' => $customer->id,
+        'vin' => '5NPE34AB4FH169289',
+        'make' => 'Hyundai',
+        'model' => 'Sonata',
+        'year' => 2021,
+    ]);
+
+    $emailService = new EmailProcessingService;
+    $email = $emailService->processIncomingEmail([
+        'sender' => 'operations@ankshipping.com',
+        'subject' => 'ANK Shipping Manifest & Invoice',
+        'body' => 'Please find attached BL and Invoice documents.',
+        'attachments' => [
+            ['filename' => 'BL_5NPE34AB4FH169289.pdf', 'file_size' => 59422],
+            ['filename' => 'Invoice_ANK00040.pdf', 'file_size' => 205174],
+        ],
+    ]);
+
+    $attachmentIds = $email->attachments->pluck('id')->toArray();
+
+    $response = $this->actingAs($user)->post("/emails/{$email->id}/link", [
+        'order_id' => $order->id,
+        'attachment_document_types' => [
+            $attachmentIds[0] => 'bill_of_lading',
+            $attachmentIds[1] => 'invoice',
+        ],
+    ]);
+
+    $response->assertRedirect();
+
+    $email->refresh();
+    expect($email->order_id)->toBe($order->id);
+    expect($order->documents()->count())->toBe(2);
+
+    $bolDoc = $order->documents()->where('document_type', 'bill_of_lading')->first();
+    expect($bolDoc)->not->toBeNull();
+    expect($bolDoc->file_name)->toBe('BL_5NPE34AB4FH169289.pdf');
+
+    $invDoc = $order->documents()->where('document_type', 'invoice')->first();
+    expect($invDoc)->not->toBeNull();
+    expect($invDoc->file_name)->toBe('Invoice_ANK00040.pdf');
+});
