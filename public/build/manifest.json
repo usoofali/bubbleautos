@@ -385,7 +385,7 @@
     ]
   },
   "resources/css/app.css": {
-    "file": "assets/app-Q73lALJ_.css",
+    "file": "assets/app-CXU1lj89.css",
     "name": "app",
     "names": [
       "app.css"
@@ -394,7 +394,7 @@
     "isEntry": true
   },
   "resources/js/app.ts": {
-    "file": "assets/app-D3FG4n-c.js",
+    "file": "assets/app-C85NcVnS.js",
     "name": "app",
     "src": "resources/js/app.ts",
     "isEntry": true,
@@ -489,7 +489,7 @@
     ]
   },
   "resources/js/pages/Dashboard.vue": {
-    "file": "assets/Dashboard-BnHZwwJx.js",
+    "file": "assets/Dashboard-OhArcLWU.js",
     "name": "Dashboard",
     "src": "resources/js/pages/Dashboard.vue",
     "isDynamicEntry": true,
@@ -510,7 +510,7 @@
     ]
   },
   "resources/js/pages/Emails/Index.vue": {
-    "file": "assets/Index-CVIZaf85.js",
+    "file": "assets/Index-BpmyQQmM.js",
     "name": "Index",
     "src": "resources/js/pages/Emails/Index.vue",
     "isDynamicEntry": true,
@@ -533,7 +533,7 @@
     ]
   },
   "resources/js/pages/InvoiceItemTemplates/Index.vue": {
-    "file": "assets/Index-u4ezZfHq.js",
+    "file": "assets/Index-DnVuYDhc.js",
     "name": "Index",
     "src": "resources/js/pages/InvoiceItemTemplates/Index.vue",
     "isDynamicEntry": true,
@@ -657,7 +657,7 @@
     ]
   },
   "resources/js/pages/Welcome.vue": {
-    "file": "assets/Welcome-D_j8nzHJ.js",
+    "file": "assets/Welcome-BqFxCpwU.js",
     "name": "Welcome",
     "src": "resources/js/pages/Welcome.vue",
     "isDynamicEntry": true,
