@@ -144,7 +144,7 @@
             </td>
             <td>
                 <span class="grid-label">Payment Method</span>
-                <span class="grid-val" style="text-transform: capitalize;">{{ str_replace('_', ' ', $payment->method ?? 'Payment') }}</span>
+                <span class="grid-val">{{ is_object($payment->method) ? $payment->method->label() : ucwords(str_replace('_', ' ', (string)($payment->method ?? 'Payment'))) }}</span>
             </td>
         </tr>
         <tr>

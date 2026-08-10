@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\InvoicePayment;
 use App\Models\Order;
+use App\Models\Payment;
 use App\Models\Setting;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
 
 class InvoicePdfController extends Controller
@@ -37,7 +38,8 @@ class InvoicePdfController extends Controller
             'companySettings' => $companySettings,
         ])->setPaper('a4', 'portrait');
 
-        $filename = 'Invoice-'.$order->order_number.'.pdf';
+        $customerSlug = $order->customer?->name ? Str::slug($order->customer->name) : null;
+        $filename = 'Invoice-'.$order->order_number.($customerSlug ? '-'.$customerSlug : '').'.pdf';
 
         return $pdf->download($filename);
     }
@@ -45,7 +47,7 @@ class InvoicePdfController extends Controller
     /**
      * Generate and download the official Payment Receipt PDF.
      */
-    public function downloadReceipt(InvoicePayment $payment): Response
+    public function downloadReceipt(Payment $payment): Response
     {
         $payment->load([
             'recorder',
@@ -70,8 +72,9 @@ class InvoicePdfController extends Controller
             'companySettings' => $companySettings,
         ])->setPaper('a4', 'portrait');
 
+        $customerSlug = $order->customer?->name ? Str::slug($order->customer->name) : null;
         $ref = $payment->reference ? str_replace('/', '-', $payment->reference) : 'REC-'.$payment->id;
-        $filename = 'Receipt-'.$ref.'.pdf';
+        $filename = 'Receipt-'.$ref.($customerSlug ? '-'.$customerSlug : '').'.pdf';
 
         return $pdf->download($filename);
     }
