@@ -3,8 +3,10 @@
 namespace App\Http\Middleware;
 
 use App\Models\Setting;
+use Closure;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
+use Symfony\Component\HttpFoundation\Response;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -14,6 +16,23 @@ class HandleInertiaRequests extends Middleware
      * @var string
      */
     protected $rootView = 'app';
+
+    /**
+     * Handle the incoming request and prevent raw JSON rendering on mobile tab restores.
+     */
+    public function handle(Request $request, Closure $next): Response
+    {
+        $response = parent::handle($request, $next);
+
+        // Instruct browser caches (especially mobile Safari/Chrome bfcache) that JSON and HTML vary by X-Inertia header
+        $response->headers->set('Vary', 'X-Inertia', false);
+
+        if ($request->header('X-Inertia')) {
+            $response->headers->set('Cache-Control', 'no-cache, max-age=0, must-revalidate, no-store');
+        }
+
+        return $response;
+    }
 
     /**
      * Determines the current asset version.
