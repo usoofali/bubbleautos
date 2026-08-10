@@ -6,6 +6,8 @@ use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\EmailInboxController;
 use App\Http\Controllers\GlobalSearchController;
 use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\InvoiceItemTemplateController;
+use App\Http\Controllers\InvoicePdfController;
 use App\Http\Controllers\NoteController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PaymentController;
@@ -81,10 +83,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/roles/{role}', [RoleController::class, 'destroy'])->name('roles.destroy');
 
     // Preset Invoice Item Catalog
-    Route::get('/invoice-item-templates', [App\Http\Controllers\InvoiceItemTemplateController::class, 'index'])->name('invoice-item-templates.index');
-    Route::post('/invoice-item-templates', [App\Http\Controllers\InvoiceItemTemplateController::class, 'store'])->name('invoice-item-templates.store');
-    Route::patch('/invoice-item-templates/{invoiceItemTemplate}', [App\Http\Controllers\InvoiceItemTemplateController::class, 'update'])->name('invoice-item-templates.update');
-    Route::delete('/invoice-item-templates/{invoiceItemTemplate}', [App\Http\Controllers\InvoiceItemTemplateController::class, 'destroy'])->name('invoice-item-templates.destroy');
+    Route::get('/invoice-item-templates', [InvoiceItemTemplateController::class, 'index'])->name('invoice-item-templates.index');
+    Route::post('/invoice-item-templates', [InvoiceItemTemplateController::class, 'store'])->name('invoice-item-templates.store');
+    Route::patch('/invoice-item-templates/{invoiceItemTemplate}', [InvoiceItemTemplateController::class, 'update'])->name('invoice-item-templates.update');
+    Route::delete('/invoice-item-templates/{invoiceItemTemplate}', [InvoiceItemTemplateController::class, 'destroy'])->name('invoice-item-templates.destroy');
+
+    // PDF Exports (Invoice & Payment Receipts)
+    Route::get('/orders/{order}/invoice/pdf', [InvoicePdfController::class, 'downloadInvoice'])->name('invoices.pdf');
+    Route::get('/invoices/payments/{payment}/pdf', [InvoicePdfController::class, 'downloadReceipt'])->name('receipts.pdf');
 
     // System & CMS Settings
     Route::get('/settings/system', [SettingController::class, 'index'])->name('settings.index');

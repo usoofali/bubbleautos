@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { Head, useForm, router } from '@inertiajs/vue3';
+import { ref, computed } from 'vue';
+import { Head, useForm, router, usePage } from '@inertiajs/vue3';
 import AppPageHeader from '@/components/common/AppPageHeader.vue';
 import AppCard from '@/components/common/AppCard.vue';
 import AppButton from '@/components/common/AppButton.vue';
@@ -24,6 +24,10 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+
+const page = usePage();
+const currencySymbol = computed(() => (page.props as any).currencySymbol || '$');
+const currencyCode = computed(() => (page.props as any).currencyCode || 'USD');
 
 // Create Modal & Form
 const showCreateModal = ref(false);
@@ -109,7 +113,7 @@ const confirmDelete = () => {
                     <thead class="text-xs uppercase font-semibold text-slate-400 border-b border-slate-200/80 dark:border-slate-700/60">
                         <tr>
                             <th class="py-3 px-4">Item Description</th>
-                            <th class="py-3 px-4 text-right">Default Amount ($)</th>
+                            <th class="py-3 px-4 text-right">Default Amount ({{ currencyCode }})</th>
                             <th class="py-3 px-4 text-right">Actions</th>
                         </tr>
                     </thead>
@@ -119,7 +123,7 @@ const confirmDelete = () => {
                                 {{ t.description }}
                             </td>
                             <td class="py-3.5 px-4 text-right font-mono font-bold text-slate-900 dark:text-white">
-                                ${{ Number(t.default_amount).toFixed(2) }}
+                                {{ currencySymbol }}{{ Number(t.default_amount).toFixed(2) }}
                             </td>
                             <td class="py-3.5 px-4 text-right">
                                 <div class="flex items-center justify-end gap-1">

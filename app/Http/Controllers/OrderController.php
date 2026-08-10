@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\DocumentType;
 use App\Enums\ShipmentStatus;
 use App\Models\Customer;
+use App\Models\InvoiceItemTemplate;
 use App\Models\Order;
 use App\Models\Setting;
 use App\Services\ActivityLogService;
@@ -134,12 +135,14 @@ class OrderController extends Controller
                 'address' => Setting::get('contact_address', '100 Shipping Way, Houston, TX 77001'),
                 'email' => Setting::get('contact_email', 'contact@bubbleautos.com'),
                 'phone' => Setting::get('contact_phone', '+1 (800) 555-BUBBLE'),
+                'currency_symbol' => Setting::get('currency_symbol', '$'),
+                'currency_code' => Setting::get('currency_code', 'USD'),
             ],
             'statusOptions' => array_map(fn ($s) => [
                 'value' => $s->value,
                 'label' => $s->label(),
             ], ShipmentStatus::cases()),
-            'invoiceItemTemplates' => \App\Models\InvoiceItemTemplate::orderBy('description')->get(['id', 'description', 'default_amount']),
+            'invoiceItemTemplates' => InvoiceItemTemplate::orderBy('description')->get(['id', 'description', 'default_amount']),
         ]);
     }
 

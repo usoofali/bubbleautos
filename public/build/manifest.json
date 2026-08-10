@@ -385,7 +385,7 @@
     ]
   },
   "resources/css/app.css": {
-    "file": "assets/app-CXU1lj89.css",
+    "file": "assets/app-UCXuzKF5.css",
     "name": "app",
     "names": [
       "app.css"
@@ -394,7 +394,7 @@
     "isEntry": true
   },
   "resources/js/app.ts": {
-    "file": "assets/app-ySXpEHQb.js",
+    "file": "assets/app-DZKAjtgu.js",
     "name": "app",
     "src": "resources/js/app.ts",
     "isEntry": true,
@@ -533,7 +533,7 @@
     ]
   },
   "resources/js/pages/InvoiceItemTemplates/Index.vue": {
-    "file": "assets/Index-DnVuYDhc.js",
+    "file": "assets/Index-0E-0PjTD.js",
     "name": "Index",
     "src": "resources/js/pages/InvoiceItemTemplates/Index.vue",
     "isDynamicEntry": true,
@@ -574,7 +574,7 @@
     ]
   },
   "resources/js/pages/Orders/Show.vue": {
-    "file": "assets/Show-DnepRC8y.js",
+    "file": "assets/Show-CwCu2xzD.js",
     "name": "Show",
     "src": "resources/js/pages/Orders/Show.vue",
     "isDynamicEntry": true,
@@ -620,7 +620,7 @@
     ]
   },
   "resources/js/pages/Settings/Index.vue": {
-    "file": "assets/Index-fqpacOPR.js",
+    "file": "assets/Index-BNtB0p4m.js",
     "name": "Index",
     "src": "resources/js/pages/Settings/Index.vue",
     "isDynamicEntry": true,

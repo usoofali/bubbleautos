@@ -34,12 +34,35 @@ const destinationPortOptions = [
     { value: 'Cotonou, Benin', label: 'Cotonou, Benin' },
 ];
 
+// Currency Presets
+const currencyPresets = [
+    { value: 'USD', label: 'USD ($) - US Dollar', symbol: '$', code: 'USD' },
+    { value: 'NGN', label: 'NGN (₦) - Nigerian Naira', symbol: '₦', code: 'NGN' },
+    { value: 'EUR', label: 'EUR (€) - Euro', symbol: '€', code: 'EUR' },
+    { value: 'GBP', label: 'GBP (£) - British Pound', symbol: '£', code: 'GBP' },
+    { value: 'CAD', label: 'CAD (CA$) - Canadian Dollar', symbol: 'CA$', code: 'CAD' },
+    { value: 'AED', label: 'AED (AED) - UAE Dirham', symbol: 'AED', code: 'AED' },
+    { value: 'custom', label: 'Custom Currency Configuration', symbol: '', code: '' },
+];
+
+const selectedCurrencyPreset = ref(props.general.currency_code || 'USD');
+
+const handleCurrencyPresetChange = (val: string) => {
+    selectedCurrencyPreset.value = val;
+    const found = currencyPresets.find(p => p.value === val);
+    if (found && val !== 'custom') {
+        generalForm.settings.currency_symbol = found.symbol;
+        generalForm.settings.currency_code = found.code;
+    }
+};
+
 // General Form
 const generalForm = useForm({
     settings: {
         company_name: props.general.company_name || 'Bubbles Autos',
         company_logo: props.general.company_logo || '/images/logo.png',
         currency_symbol: props.general.currency_symbol || '$',
+        currency_code: props.general.currency_code || 'USD',
         time_zone: props.general.time_zone || 'UTC',
     },
 });
@@ -84,16 +107,44 @@ const submitWebsite = () => {
 };
 
 // Email & IMAP Configuration Form
+const getInitialProvider = (host?: string): string => {
+    if (!host || host.includes('gmail')) return 'gmail';
+    if (host.includes('yahoo')) return 'yahoo';
+    return 'custom';
+};
+
+const initialProvider = props.email.email_provider || getInitialProvider(props.email.imap_host);
+
 const emailForm = useForm({
     settings: {
         email_account: props.email.email_account || 'operations@ankshipping.com',
-        imap_host: props.email.imap_host || 'imap.gmail.com',
+        email_provider: initialProvider,
+        imap_host: props.email.imap_host || (initialProvider === 'yahoo' ? 'imap.mail.yahoo.com' : 'imap.gmail.com'),
         imap_port: props.email.imap_port || '993',
         imap_encryption: props.email.imap_encryption || 'ssl',
         imap_username: props.email.imap_username || 'operations@ankshipping.com',
         imap_password: props.email.imap_password || '',
     },
 });
+
+const providerOptions = [
+    { value: 'gmail', label: 'Gmail / Google Workspace (imap.gmail.com)' },
+    { value: 'yahoo', label: 'Yahoo Mail (imap.mail.yahoo.com)' },
+    { value: 'custom', label: 'Custom IMAP Server' },
+];
+
+const handleProviderChange = (val: string) => {
+    emailForm.settings.email_provider = val;
+    if (val === 'gmail') {
+        emailForm.settings.imap_host = 'imap.gmail.com';
+        emailForm.settings.imap_port = '993';
+        emailForm.settings.imap_encryption = 'ssl';
+    } else if (val === 'yahoo') {
+        emailForm.settings.imap_host = 'imap.mail.yahoo.com';
+        emailForm.settings.imap_port = '993';
+        emailForm.settings.imap_encryption = 'ssl';
+    }
+};
 
 const submitEmail = () => {
     emailForm.post('/settings/email', {
@@ -142,14 +193,30 @@ const submitEmail = () => {
 
         <!-- General Settings Tab -->
         <div v-if="activeTab === 'general'">
-            <AppCard title="General System Configuration">
+            <AppCard title="General System Configuration" description="System name, default billing currency, and time zone">
                 <form @submit.prevent="submitGeneral" class="space-y-4 max-w-xl">
                     <AppFormField label="Company Name">
                         <AppInput v-model="generalForm.settings.company_name" />
                     </AppFormField>
-                    <AppFormField label="Currency Symbol">
-                        <AppInput v-model="generalForm.settings.currency_symbol" placeholder="$" />
+                    
+                    <AppFormField label="Currency Preset">
+                        <AppSelect
+                            :modelValue="selectedCurrencyPreset"
+                            @update:modelValue="handleCurrencyPresetChange"
+                            :options="currencyPresets"
+                            placeholder="Select Currency Preset..."
+                        />
                     </AppFormField>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <AppFormField label="Currency Symbol (e.g. $ or ₦)">
+                            <AppInput v-model="generalForm.settings.currency_symbol" placeholder="$" />
+                        </AppFormField>
+                        <AppFormField label="Currency Code (e.g. USD or NGN)">
+                            <AppInput v-model="generalForm.settings.currency_code" placeholder="USD" />
+                        </AppFormField>
+                    </div>
+
                     <AppFormField label="System Time Zone">
                         <AppInput v-model="generalForm.settings.time_zone" placeholder="UTC" />
                     </AppFormField>
@@ -198,15 +265,23 @@ const submitEmail = () => {
 
         <!-- Shipping Email Integration Tab -->
         <div v-if="activeTab === 'email'">
-            <AppCard title="Incoming Shipping Mail Account & IMAP Settings" description="Configure Gmail or IMAP server credentials to fetch and parse shipping emails from operations@ankshipping.com">
+            <AppCard title="Incoming Shipping Mail Account & IMAP Settings" description="Configure Gmail, Yahoo Mail, or custom IMAP server credentials to fetch and parse shipping emails from operations@ankshipping.com">
                 <form @submit.prevent="submitEmail" class="space-y-4 max-w-xl">
                     <AppFormField label="Shipping Carrier Email Account">
                         <AppInput v-model="emailForm.settings.email_account" placeholder="operations@ankshipping.com" />
                     </AppFormField>
 
+                    <AppFormField label="Mail Provider Preset">
+                        <AppSelect
+                            :model-value="emailForm.settings.email_provider"
+                            @update:model-value="handleProviderChange"
+                            :options="providerOptions"
+                        />
+                    </AppFormField>
+
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <AppFormField label="IMAP Server Host">
-                            <AppInput v-model="emailForm.settings.imap_host" placeholder="imap.gmail.com" />
+                            <AppInput v-model="emailForm.settings.imap_host" placeholder="imap.gmail.com or imap.mail.yahoo.com" />
                         </AppFormField>
                         <AppFormField label="IMAP Port">
                             <AppInput v-model="emailForm.settings.imap_port" placeholder="993" />
@@ -230,13 +305,21 @@ const submitEmail = () => {
                         </AppFormField>
                     </div>
 
-                    <AppFormField label="Gmail App Password / Account Password">
+                    <AppFormField label="App Password / Account Password">
                         <AppInput type="password" v-model="emailForm.settings.imap_password" placeholder="•••• •••• •••• ••••" />
                     </AppFormField>
 
-                    <div class="p-3 bg-blue-50/60 dark:bg-blue-950/30 rounded-xl border border-blue-200/60 dark:border-blue-900/40 text-xs text-blue-800 dark:text-blue-300 space-y-1">
+                    <div v-if="emailForm.settings.email_provider === 'yahoo'" class="p-3 bg-purple-50/60 dark:bg-purple-950/30 rounded-xl border border-purple-200/60 dark:border-purple-900/40 text-xs text-purple-900 dark:text-purple-300 space-y-1">
+                        <strong class="font-bold">Yahoo Mail Setup Tip:</strong>
+                        <p>If using Yahoo Mail to manage <code>{{ emailForm.settings.email_account || 'operations@ankshipping.com' }}</code>, generate an App Password under <strong>Yahoo Account Security &gt; Generate App Password</strong> and paste it into the password field above.</p>
+                    </div>
+                    <div v-else-if="emailForm.settings.email_provider === 'gmail'" class="p-3 bg-blue-50/60 dark:bg-blue-950/30 rounded-xl border border-blue-200/60 dark:border-blue-900/40 text-xs text-blue-800 dark:text-blue-300 space-y-1">
                         <strong class="font-bold">Gmail Setup Tip:</strong>
-                        <p>If using Gmail to manage <code>operations@ankshipping.com</code>, generate a 16-character App Password under your Google Account Security settings and paste it above.</p>
+                        <p>If using Gmail / Google Workspace to manage <code>{{ emailForm.settings.email_account || 'operations@ankshipping.com' }}</code>, generate a 16-character App Password under your <strong>Google Account Security settings</strong> and paste it above.</p>
+                    </div>
+                    <div v-else class="p-3 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 text-xs text-slate-600 dark:text-slate-400 space-y-1">
+                        <strong class="font-bold">Custom IMAP Setup Tip:</strong>
+                        <p>Ensure your custom mail server host and port (typically 993 for SSL) are accessible and enter your login credentials above.</p>
                     </div>
 
                     <div class="flex justify-end pt-3">

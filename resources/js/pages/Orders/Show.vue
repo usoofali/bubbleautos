@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { Head, Link, useForm, router } from '@inertiajs/vue3';
+import { Head, Link, useForm, router, usePage } from '@inertiajs/vue3';
 import AppPageHeader from '@/components/common/AppPageHeader.vue';
 import AppCard from '@/components/common/AppCard.vue';
 import AppBadge from '@/components/common/AppBadge.vue';
@@ -39,6 +39,9 @@ import {
     ShieldCheck,
     Paperclip,
     Unlink,
+    ExternalLink,
+    Send,
+    Eye,
 } from '@lucide/vue';
 
 interface Order {
@@ -74,9 +77,15 @@ const props = defineProps<{
         address?: string;
         email?: string;
         phone?: string;
+        currency_symbol?: string;
+        currency_code?: string;
     };
     invoiceItemTemplates?: Array<{ id: number; description: string; default_amount: number | string }>;
 }>();
+
+const page = usePage();
+const currencySymbol = computed(() => props.companySettings?.currency_symbol || (page.props as any).currencySymbol || '$');
+const currencyCode = computed(() => props.companySettings?.currency_code || (page.props as any).currencyCode || 'USD');
 
 const activeTab = ref<'overview' | 'financials' | 'documents' | 'emails' | 'notes' | 'timeline'>('overview');
 
@@ -462,66 +471,13 @@ const shareDocumentViaWhatsapp = async (doc: any) => {
     window.open(url, '_blank');
 };
 
-const shareInvoiceViaWhatsapp = () => {
-    const rawPhone = props.order.customer?.phone || '';
-    const phone = formatPhoneForWhatsapp(rawPhone);
-    const vehicle = [props.order.year, props.order.make, props.order.model].filter(Boolean).join(' ') || 'Vehicle';
-    const total = Number(props.order.invoice?.total || 0).toFixed(2);
-    const paid = Number(props.order.invoice?.paid || 0).toFixed(2);
-    const balance = Number(props.order.invoice?.balance || 0).toFixed(2);
-    const items = props.order.invoice?.items || [];
-
-    let text = `*BUBBLES AUTOS - OFFICIAL INVOICE*\n\n`;
-    text += `📋 *Invoice #:* Invoice# ${props.order.order_number}\n`;
-    text += `🔖 *Order #:* ${props.order.order_number}\n`;
-    text += `🚗 *Vehicle:* ${vehicle}\n`;
-    text += `🔑 *VIN:* ${props.order.vin}\n`;
-    text += `👤 *Customer:* ${props.order.customer?.name || 'Valued Customer'}\n\n`;
-
-    if (items.length > 0) {
-        text += `--- *ITEMIZED BILLING* ---\n`;
-        items.forEach((item: any, idx: number) => {
-            text += `${idx + 1}. ${item.description}: *$${Number(item.amount).toFixed(2)}*\n`;
-        });
-        text += `\n`;
-    }
-
-    text += `💰 *Total Invoice Amount:* $${total}\n`;
-    text += `✅ *Amount Paid:* $${paid}\n`;
-    text += `💳 *Balance Due:* *$${balance}*\n\n`;
-    text += `Thank you for doing business with Bubbles Autos!`;
-
-    const encodedText = encodeURIComponent(text);
-    const url = phone ? `https://wa.me/${phone}?text=${encodedText}` : `https://wa.me/?text=${encodedText}`;
-    window.open(url, '_blank');
+const downloadInvoicePdf = () => {
+    window.location.href = `/orders/${props.order.id}/invoice/pdf`;
 };
 
-const shareReceiptViaWhatsapp = (payment: any) => {
+const downloadReceiptPdf = (payment: any) => {
     if (!payment) return;
-    const rawPhone = props.order.customer?.phone || '';
-    const phone = formatPhoneForWhatsapp(rawPhone);
-    const vehicle = [props.order.year, props.order.make, props.order.model].filter(Boolean).join(' ') || 'Vehicle';
-    const amount = Number(payment.amount || 0).toFixed(2);
-    const method = (payment.method || 'payment').replace('_', ' ').toUpperCase();
-    const refNo = payment.reference || `REC-${payment.id}`;
-    const dateStr = formatDateOnly(payment.payment_date);
-    const balance = Number(props.order.invoice?.balance || 0).toFixed(2);
-
-    let text = `*BUBBLES AUTOS - OFFICIAL PAYMENT RECEIPT*\n\n`;
-    text += `🧾 *Receipt Ref:* ${refNo}\n`;
-    text += `📋 *Order #:* ${props.order.order_number}\n`;
-    text += `🚗 *Vehicle:* ${vehicle}\n`;
-    text += `🔑 *VIN:* ${props.order.vin}\n`;
-    text += `👤 *Customer:* ${props.order.customer?.name || 'Valued Customer'}\n\n`;
-    text += `💵 *Amount Received:* *$${amount}*\n`;
-    text += `📅 *Payment Date:* ${dateStr}\n`;
-    text += `💳 *Payment Method:* ${method}\n`;
-    text += `💰 *Remaining Balance:* $${balance}\n\n`;
-    text += `Thank you for your payment!`;
-
-    const encodedText = encodeURIComponent(text);
-    const url = phone ? `https://wa.me/${phone}?text=${encodedText}` : `https://wa.me/?text=${encodedText}`;
-    window.open(url, '_blank');
+    window.location.href = `/invoices/payments/${payment.id}/pdf`;
 };
 
 // Delete Document Confirm Modal
@@ -825,16 +781,15 @@ const formatFileSize = (bytes: number | null | undefined) => {
                             <span class="text-slate-400">Payment Status:</span>
                             <AppBadge :status="order.invoice?.status" size="md" />
                         </div>
+                        <AppButton size="sm" variant="primary" @click="downloadInvoicePdf" class="rounded-xl font-bold shadow-xs">
+                            <Download class="w-4 h-4" />
+                            <span>Download Invoice</span>
+                        </AppButton>
                         <AppButton size="sm" variant="outline" @click="showPrintInvoiceModal = true" class="rounded-xl font-bold">
-                            <Printer class="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                            <span>Print Invoice</span>
+                            <FileText class="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                            <span>Preview</span>
                         </AppButton>
-                        <AppButton size="sm" variant="secondary" @click="shareInvoiceViaWhatsapp" class="rounded-xl font-bold border-emerald-300 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40">
-                            <svg class="w-4 h-4 fill-current text-emerald-600 dark:text-emerald-400 shrink-0" viewBox="0 0 24 24">
-                                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
-                            </svg>
-                            <span>WhatsApp Invoice</span>
-                        </AppButton>
+
                         <AppButton size="sm" variant="primary" @click="openAddItemModal" class="rounded-xl font-bold">
                             <Plus class="w-4 h-4" />
                             <span>Add Item</span>
@@ -847,14 +802,14 @@ const formatFileSize = (bytes: number | null | undefined) => {
                         <thead class="text-xs uppercase font-semibold text-slate-400 border-b border-slate-200/80 dark:border-slate-700/60">
                             <tr>
                                 <th class="py-3 px-4">Description</th>
-                                <th class="py-3 px-4 text-right">Amount ($)</th>
+                                <th class="py-3 px-4 text-right">Amount ({{ currencyCode }})</th>
                                 <th class="py-3 px-4 text-right">Action</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100 dark:divide-slate-700/60">
                             <tr v-for="item in order.invoice?.items" :key="item.id" class="hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition-colors">
                                 <td class="py-3 px-4 font-medium text-slate-900 dark:text-white">{{ item.description }}</td>
-                                <td class="py-3 px-4 text-right font-bold text-slate-900 dark:text-white">${{ Number(item.amount).toFixed(2) }}</td>
+                                <td class="py-3 px-4 text-right font-bold text-slate-900 dark:text-white">{{ currencySymbol }}{{ Number(item.amount).toFixed(2) }}</td>
                                 <td class="py-3 px-4 text-right">
                                     <div class="flex items-center justify-end gap-1">
                                         <button
@@ -882,15 +837,15 @@ const formatFileSize = (bytes: number | null | undefined) => {
                 <div class="mt-6 pt-4 border-t border-slate-200 dark:border-slate-700 flex flex-col items-end gap-1.5 text-sm">
                     <div class="flex items-center justify-between w-64 text-base font-bold text-slate-900 dark:text-white">
                         <span>Total Invoice Amount:</span>
-                        <span>${{ Number(order.invoice?.total || 0).toFixed(2) }}</span>
+                        <span>{{ currencySymbol }}{{ Number(order.invoice?.total || 0).toFixed(2) }}</span>
                     </div>
                     <div class="flex items-center justify-between w-64 text-emerald-600 dark:text-emerald-400 font-semibold">
                         <span>Total Paid:</span>
-                        <span>${{ Number(order.invoice?.paid || 0).toFixed(2) }}</span>
+                        <span>{{ currencySymbol }}{{ Number(order.invoice?.paid || 0).toFixed(2) }}</span>
                     </div>
                     <div class="flex items-center justify-between w-64 text-base font-extrabold text-blue-600 dark:text-blue-400 pt-2 border-t border-slate-200 dark:border-slate-700">
                         <span>Remaining Balance:</span>
-                        <span>${{ Number(order.invoice?.balance || 0).toFixed(2) }}</span>
+                        <span>{{ currencySymbol }}{{ Number(order.invoice?.balance || 0).toFixed(2) }}</span>
                     </div>
                 </div>
             </AppCard>
@@ -930,27 +885,26 @@ const formatFileSize = (bytes: number | null | undefined) => {
                                     {{ p.recorded_by?.name || 'Staff' }}
                                 </td>
                                 <td class="py-3 px-4 text-right font-bold text-emerald-600 dark:text-emerald-400">
-                                    +${{ Number(p.amount).toFixed(2) }}
+                                    +{{ currencySymbol }}{{ Number(p.amount).toFixed(2) }}
                                 </td>
                                 <td class="py-3 px-4 text-right">
                                     <div class="flex items-center justify-end gap-1">
-                                        <!-- Share Receipt via WhatsApp Button -->
+                                        <!-- Download Payment Receipt PDF Button -->
                                         <button
-                                            @click="shareReceiptViaWhatsapp(p)"
-                                            class="text-emerald-600 hover:text-emerald-800 dark:text-emerald-400 p-1.5 rounded-lg hover:bg-emerald-50 dark:hover:bg-emerald-950/40 transition-colors"
-                                            title="Share Payment Receipt via WhatsApp"
+                                            @click="downloadReceiptPdf(p)"
+                                            class="text-blue-600 hover:text-blue-800 dark:text-blue-400 p-1.5 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-955 transition-colors"
+                                            title="Download Official Payment Receipt PDF"
                                         >
-                                            <svg class="w-4 h-4 fill-current text-emerald-600 dark:text-emerald-400" viewBox="0 0 24 24">
-                                                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
-                                            </svg>
+                                            <Download class="w-4 h-4" />
                                         </button>
-                                        <!-- Print Payment Receipt Button -->
+
+                                        <!-- Preview Payment Receipt Button -->
                                         <button
                                             @click="openReceiptModal(p)"
-                                            class="text-blue-600 hover:text-blue-800 dark:text-blue-400 p-1.5 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-955 transition-colors"
-                                            title="Print Official Payment Receipt"
+                                            class="text-slate-500 hover:text-slate-700 dark:text-slate-400 p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                                            title="Preview Official Payment Receipt"
                                         >
-                                            <Printer class="w-4 h-4" />
+                                            <FileText class="w-4 h-4" />
                                         </button>
                                         <button
                                             @click="deletingPayment = p"
@@ -1431,7 +1385,7 @@ const formatFileSize = (bytes: number | null | undefined) => {
                         <div class="pt-2">
                             <span class="text-xs font-semibold text-slate-500 uppercase block">Balance Due</span>
                             <span class="text-2xl font-black text-slate-900 dark:text-white">
-                                ${{ Number(order.invoice?.balance || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+                                {{ currencySymbol }}{{ Number(order.invoice?.balance || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
                             </span>
                         </div>
                     </div>
@@ -1481,7 +1435,7 @@ const formatFileSize = (bytes: number | null | undefined) => {
                             <tr>
                                 <th class="py-3 px-4 w-12 text-center border-b border-slate-200 dark:border-slate-800">#</th>
                                 <th class="py-3 px-4 border-b border-slate-200 dark:border-slate-800">Description / Item</th>
-                                <th class="py-3 px-4 text-right w-36 border-b border-slate-200 dark:border-slate-800">Amount ($)</th>
+                                <th class="py-3 px-4 text-right w-36 border-b border-slate-200 dark:border-slate-800">Amount ({{ currencyCode }})</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-200 dark:divide-slate-800 font-medium">
@@ -1490,7 +1444,7 @@ const formatFileSize = (bytes: number | null | undefined) => {
                                 <td class="py-3 px-4">
                                     <div class="font-bold text-slate-900 dark:text-white text-sm">{{ item.description }}</div>
                                 </td>
-                                <td class="py-3 px-4 text-right font-bold text-slate-900 dark:text-white font-mono">${{ Number(item.amount).toFixed(2) }}</td>
+                                <td class="py-3 px-4 text-right font-bold text-slate-900 dark:text-white font-mono">{{ currencySymbol }}{{ Number(item.amount).toFixed(2) }}</td>
                             </tr>
                             <tr v-if="!order.invoice?.items || order.invoice.items.length === 0">
                                 <td colspan="3" class="py-6 text-center text-slate-400 italic">No line items added to this invoice yet.</td>
@@ -1504,19 +1458,19 @@ const formatFileSize = (bytes: number | null | undefined) => {
                     <div class="w-72 space-y-2 text-xs">
                         <div class="flex items-center justify-between text-slate-600 dark:text-slate-400 font-medium">
                             <span>Sub Total <span class="text-[10px] text-slate-400">(Tax Inclusive)</span></span>
-                            <span class="font-bold text-slate-900 dark:text-white font-mono">${{ Number(order.invoice?.total || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</span>
+                            <span class="font-bold text-slate-900 dark:text-white font-mono">{{ currencySymbol }}{{ Number(order.invoice?.total || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</span>
                         </div>
                         <div class="flex items-center justify-between text-slate-905 dark:text-slate-100 font-medium">
                             <span>Payments Received</span>
-                            <span class="font-bold text-emerald-600 font-mono">-${{ Number(order.invoice?.paid || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</span>
+                            <span class="font-bold text-emerald-600 font-mono">-{{ currencySymbol }}{{ Number(order.invoice?.paid || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</span>
                         </div>
                         <div class="flex items-center justify-between text-slate-900 dark:text-white text-sm font-extrabold pt-2 border-t border-slate-200 dark:border-slate-800">
                             <span>Total</span>
-                            <span class="font-mono">${{ Number(order.invoice?.total || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</span>
+                            <span class="font-mono">{{ currencySymbol }}{{ Number(order.invoice?.total || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</span>
                         </div>
                         <div class="flex items-center justify-between bg-slate-100 dark:bg-slate-800/80 p-3 rounded-xl font-bold text-slate-900 dark:text-white text-sm mt-2">
                             <span>Balance Due</span>
-                            <span class="font-mono font-black">${{ Number(order.invoice?.balance || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</span>
+                            <span class="font-mono font-black">{{ currencySymbol }}{{ Number(order.invoice?.balance || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</span>
                         </div>
                     </div>
                 </div>
@@ -1531,14 +1485,9 @@ const formatFileSize = (bytes: number | null | undefined) => {
             <!-- Modal Action Buttons -->
             <div class="flex flex-wrap justify-end gap-3 print:hidden">
                 <AppButton variant="outline" @click="showPrintInvoiceModal = false">Close</AppButton>
-                <AppButton variant="secondary" @click="shareInvoiceViaWhatsapp" class="rounded-xl font-bold bg-emerald-600 hover:bg-emerald-500 text-white">
-                    <svg class="w-4 h-4 fill-current text-white shrink-0" viewBox="0 0 24 24">
-                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
-                    </svg>
-                    <span>WhatsApp Invoice</span>
-                </AppButton>
-                <AppButton variant="primary" @click="printInvoice">
-                    <Printer class="w-4 h-4" /> Print / Save PDF
+
+                <AppButton variant="primary" @click="downloadInvoicePdf">
+                    <Download class="w-4 h-4" /> Download Invoice PDF
                 </AppButton>
             </div>
         </div>
@@ -1568,7 +1517,7 @@ const formatFileSize = (bytes: number | null | undefined) => {
                 <div class="space-y-4 text-sm leading-relaxed">
                     <p>Received with thanks from <strong class="text-slate-900 dark:text-white">{{ order.customer?.name }}</strong> the sum of:</p>
                     <div class="text-3xl font-black text-emerald-600 font-mono py-2 bg-emerald-50/50 dark:bg-emerald-950/20 text-center rounded-xl border border-emerald-200/50 dark:border-emerald-900/30">
-                        ${{ Number(printingPayment.amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+                        {{ currencySymbol }}{{ Number(printingPayment.amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
                     </div>
                     
                     <div class="grid grid-cols-2 gap-4 text-xs bg-slate-50 dark:bg-slate-850 p-4 rounded-xl border border-slate-100 dark:border-slate-800">
@@ -1595,14 +1544,9 @@ const formatFileSize = (bytes: number | null | undefined) => {
 
             <div class="flex flex-wrap justify-end gap-3 print:hidden">
                 <AppButton variant="outline" @click="closeReceiptModal">Close</AppButton>
-                <AppButton variant="secondary" @click="shareReceiptViaWhatsapp(printingPayment)" class="rounded-xl font-bold bg-emerald-600 hover:bg-emerald-500 text-white">
-                    <svg class="w-4 h-4 fill-current text-white shrink-0" viewBox="0 0 24 24">
-                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
-                    </svg>
-                    <span>WhatsApp Receipt</span>
-                </AppButton>
-                <AppButton variant="primary" @click="printPaymentReceipt">
-                    <Printer class="w-4 h-4" /> Print Receipt
+
+                <AppButton variant="primary" @click="downloadReceiptPdf(printingPayment)">
+                    <Download class="w-4 h-4" /> Download Receipt PDF
                 </AppButton>
             </div>
         </div>

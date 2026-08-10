@@ -36,12 +36,15 @@ class HandleInertiaRequests extends Middleware
             ...parent::share($request),
             'appName' => Setting::get('company_name', 'Bubbles Autos'),
             'currencySymbol' => Setting::get('currency_symbol', '$'),
+            'currencyCode' => Setting::get('currency_code', 'USD'),
             'company' => [
                 'name' => Setting::get('company_name', 'Bubbles Autos'),
                 'logo' => Setting::get('company_logo', '/logo.jpeg'),
                 'address' => Setting::get('contact_address', '100 Shipping Way, Houston, TX 77001'),
                 'email' => Setting::get('contact_email', 'contact@bubbleautos.com'),
                 'phone' => Setting::get('contact_phone', '+1 (800) 555-BUBBLE'),
+                'currency_symbol' => Setting::get('currency_symbol', '$'),
+                'currency_code' => Setting::get('currency_code', 'USD'),
             ],
             'auth' => [
                 'user' => $user ? [

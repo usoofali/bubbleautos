@@ -139,11 +139,13 @@ class EmailFetchService
         if (! str_contains($loginResponse['last_line'], "{$tag} OK")) {
             fclose($fp);
 
+            $providerName = str_contains($host, 'yahoo') ? 'Yahoo Mail' : (str_contains($host, 'gmail') ? 'Gmail' : 'IMAP');
+
             return [
                 'success' => false,
                 'count' => 0,
                 'emails' => [],
-                'message' => 'IMAP Authentication Failed for '.$username.'. Please verify your Gmail App Password.',
+                'message' => "IMAP Authentication Failed for {$username}. Please verify your {$providerName} App Password and server settings.",
             ];
         }
 
