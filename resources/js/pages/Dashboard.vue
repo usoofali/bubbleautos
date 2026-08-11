@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { Head, Link } from '@inertiajs/vue3';
+import { computed } from 'vue';
+import { Head, Link, usePage } from '@inertiajs/vue3';
 import AppPageHeader from '@/components/common/AppPageHeader.vue';
 import AppCard from '@/components/common/AppCard.vue';
 import AppBadge from '@/components/common/AppBadge.vue';
@@ -19,6 +20,9 @@ interface Props {
 }
 
 defineProps<Props>();
+
+const page = usePage();
+const currencySymbol = computed(() => (page.props.currencySymbol as string) || (page.props.company as any)?.currency_symbol || '$');
 </script>
 
 <template>
@@ -100,7 +104,7 @@ defineProps<Props>();
                     </div>
                 </div>
                 <div class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mb-1 font-mono tracking-tight">
-                    ${{ metrics.outstanding_invoices_total.toLocaleString('en-US', { minimumFractionDigits: 2 }) }}
+                    {{ currencySymbol }}{{ metrics.outstanding_invoices_total.toLocaleString('en-US', { minimumFractionDigits: 2 }) }}
                 </div>
                 <p class="text-xs font-medium text-slate-500 dark:text-slate-400">{{ metrics.outstanding_invoices_count }} invoice(s) pending payment</p>
             </AppCard>

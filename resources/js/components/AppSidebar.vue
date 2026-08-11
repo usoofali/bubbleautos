@@ -64,6 +64,12 @@ const operationsItems = computed(() => [
         show: hasPermission('orders.view'),
     },
     {
+        title: 'Vehicle Sales',
+        href: '/vehicle-sales',
+        icon: Receipt,
+        show: true,
+    },
+    {
         title: 'Customers',
         href: '/customers',
         icon: Users,

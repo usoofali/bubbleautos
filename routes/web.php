@@ -14,6 +14,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\VehicleSaleController;
 use App\Http\Controllers\WelcomeController;
 use Illuminate\Support\Facades\Route;
 
@@ -91,6 +92,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // PDF Exports (Invoice & Payment Receipts)
     Route::get('/orders/{order}/invoice/pdf', [InvoicePdfController::class, 'downloadInvoice'])->name('invoices.pdf');
     Route::get('/invoices/payments/{payment}/pdf', [InvoicePdfController::class, 'downloadReceipt'])->name('receipts.pdf');
+
+    // Standalone Vehicle Sales Documentation Module
+    Route::resource('vehicle-sales', VehicleSaleController::class);
+    Route::get('/vehicle-sales/{vehicleSale}/invoice/pdf', [VehicleSaleController::class, 'downloadInvoice'])->name('vehicle-sales.invoice.pdf');
+    Route::get('/vehicle-sales/{vehicleSale}/receipt/pdf', [VehicleSaleController::class, 'downloadReceipt'])->name('vehicle-sales.receipt.pdf');
+    Route::post('/vehicle-sales/{vehicleSale}/payments', [VehicleSaleController::class, 'storePayment'])->name('vehicle-sales.payments.store');
+    Route::get('/vehicle-sales/{vehicleSale}/payments/{payment}/receipt/pdf', [VehicleSaleController::class, 'downloadPaymentReceipt'])->name('vehicle-sales.payments.receipt.pdf');
 
     // System & CMS Settings
     Route::get('/settings/system', [SettingController::class, 'index'])->name('settings.index');

@@ -1,0 +1,1 @@
+import{n as e}from"./lib-DI4oPWdh.js";var t={success:t=>{e.success(t,{duration:4e3})},error:t=>{e.error(t,{duration:5e3})},info:t=>{e.info(t,{duration:4e3})},warning:t=>{e.warning(t,{duration:4e3})}};export{t};
