@@ -428,7 +428,7 @@
     "isEntry": true
   },
   "resources/js/app.ts": {
-    "file": "assets/app-CTX5XHIP.js",
+    "file": "assets/app-DFfY14zA.js",
     "name": "app",
     "src": "resources/js/app.ts",
     "isEntry": true,
@@ -625,7 +625,7 @@
     ]
   },
   "resources/js/pages/Orders/Show.vue": {
-    "file": "assets/Show-DoiGm9Qv.js",
+    "file": "assets/Show-CFhZ_XtB.js",
     "name": "Show",
     "src": "resources/js/pages/Orders/Show.vue",
     "isDynamicEntry": true,

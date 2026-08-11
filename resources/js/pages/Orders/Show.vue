@@ -371,24 +371,7 @@ const submitDocumentUpload = () => {
     });
 };
 
-// Printable Invoice Modal & Action
-const showPrintInvoiceModal = ref(false);
-const printInvoice = () => {
-    window.print();
-};
 
-// Printable Payment Receipt Modal & Action
-const printingPayment = ref<any>(null);
-const openReceiptModal = (p: any) => {
-    // Spread into plain object to avoid reactive proxy issues with Teleport
-    printingPayment.value = { ...p, recorded_by: p.recorded_by ? { ...p.recorded_by } : null };
-};
-const closeReceiptModal = () => {
-    printingPayment.value = null;
-};
-const printPaymentReceipt = () => {
-    window.print();
-};
 
 // Printable Telex Release Viewer Modal
 const printingTelexDoc = ref<any>(null);
@@ -785,10 +768,7 @@ const formatFileSize = (bytes: number | null | undefined) => {
                             <Download class="w-4 h-4" />
                             <span>Download Invoice</span>
                         </AppButton>
-                        <AppButton size="sm" variant="outline" @click="showPrintInvoiceModal = true" class="rounded-xl font-bold">
-                            <FileText class="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                            <span>Preview</span>
-                        </AppButton>
+
 
                         <AppButton size="sm" variant="primary" @click="openAddItemModal" class="rounded-xl font-bold">
                             <Plus class="w-4 h-4" />
@@ -898,14 +878,6 @@ const formatFileSize = (bytes: number | null | undefined) => {
                                             <Download class="w-4 h-4" />
                                         </button>
 
-                                        <!-- Preview Payment Receipt Button -->
-                                        <button
-                                            @click="openReceiptModal(p)"
-                                            class="text-slate-500 hover:text-slate-700 dark:text-slate-400 p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                                            title="Preview Official Payment Receipt"
-                                        >
-                                            <FileText class="w-4 h-4" />
-                                        </button>
                                         <button
                                             @click="deletingPayment = p"
                                             class="text-red-500 hover:text-red-700 dark:text-red-400 p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors"
@@ -1358,199 +1330,7 @@ const formatFileSize = (bytes: number | null | undefined) => {
         </form>
     </AppModal>
 
-    <!-- Printable Invoice Viewer Modal -->
-    <AppModal :show="showPrintInvoiceModal" title="Invoice Preview" maxWidth="3xl" @close="showPrintInvoiceModal = false">
-        <div class="space-y-6">
-            <!-- Official Invoice Print Sheet -->
-            <div id="invoice-print-area" class="p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white space-y-6 shadow-sm">
-               <div class="relative flex flex-col sm:flex-row sm:items-start justify-between gap-6 border-b border-slate-200 dark:border-slate-800 pb-6">
-                    <!-- Image with Text Overlaid Below Center -->
-                    <div class="relative">
-                        <img src="/logo.jpeg" alt="Bubbles Autos Logo" class="h-40 w-auto object-contain rounded-sm" />
-                        
-                        <!-- Text Layer Overlapping the Bottom Edge -->
-                        <div class="absolute -bottom-6 left-0 z-10 space-y-0.5 text-xs text-slate-600 dark:text-slate-400">
-                            <h3 class="font-extrabold text-sm text-slate-900 dark:text-white uppercase tracking-wider">{{ props.companySettings?.name || $page.props.company?.name || 'BUBBLES AUTOS' }}</h3>
-                            <div>{{ props.companySettings?.address || $page.props.company?.address || '100 Shipping Way, Houston, TX 77001' }}</div>
-                            <div>{{ props.companySettings?.email || $page.props.company?.email || 'contact@bubbleautos.com' }}</div>
-                        </div>
-                    </div>
 
-                    <!-- Invoice Summary Right Column -->
-                    <div class="sm:text-right space-y-1">
-                        <h1 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Invoice</h1>
-                        <div class="font-mono text-sm font-bold text-slate-600 dark:text-slate-400">
-                            Invoice# {{ order.order_number }}
-                        </div>
-                        <div class="pt-2">
-                            <span class="text-xs font-semibold text-slate-500 uppercase block">Balance Due</span>
-                            <span class="text-2xl font-black text-slate-900 dark:text-white">
-                                {{ currencySymbol }}{{ Number(order.invoice?.balance || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Bill To & Metadata Row -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm">
-                    <!-- Bill To Customer -->
-                    <div class="space-y-2">
-                        <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Bill To</span>
-                        <div class="font-bold text-base text-slate-900 dark:text-white">{{ order.customer?.name || 'N/A' }}</div>
-                        <div v-if="order.customer?.address" class="text-xs text-slate-600 dark:text-slate-400">{{ order.customer.address }}</div>
-                        <div v-if="order.customer?.phone" class="text-xs text-slate-600 dark:text-slate-400">{{ order.customer.phone }}</div>
-                    </div>
-
-                    <!-- Dates & Order Reference -->
-                    <div class="sm:text-right space-y-1.5 text-xs text-slate-600 dark:text-slate-400">
-                        <div class="flex sm:justify-end gap-2">
-                            <span class="font-semibold text-slate-500">Invoice Date :</span>
-                            <span class="font-bold text-slate-900 dark:text-white">{{ formatDateOnly(order.created_at || new Date().toISOString()) }}</span>
-                        </div>
-                        <div class="flex sm:justify-end gap-2">
-                            <span class="font-semibold text-slate-500">Terms :</span>
-                            <span class="font-bold text-slate-900 dark:text-white">Custom</span>
-                        </div>
-                        <div class="flex sm:justify-end gap-2">
-                            <span class="font-semibold text-slate-500">Due Date :</span>
-                            <span class="font-bold text-slate-900 dark:text-white">{{ formatDateOnly(order.expected_arrival || order.created_at) }}</span>
-                        </div>
-                        <div class="flex sm:justify-end gap-2 pt-1 font-mono">
-                            <span class="font-bold text-slate-900 dark:text-white uppercase">
-                                {{ order.year ? order.year + ' ' : '' }}{{ order.make || '' }} {{ order.model || '' }}
-                            </span>
-                        </div>
-                        <div class="flex sm:justify-end gap-2 pt-1 font-mono">
-                            <span class="font-bold text-slate-900 dark:text-white uppercase">
-                                {{ order.vin }}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Itemized Invoice Table -->
-                <div class="overflow-x-auto border border-slate-200 dark:border-slate-800 rounded-xl">
-                    <table class="w-full text-left text-xs whitespace-nowrap">
-                        <thead class="bg-slate-950 dark:bg-black text-white uppercase text-[11px] font-bold tracking-wider">
-                            <tr>
-                                <th class="py-3 px-4 w-12 text-center border-b border-slate-200 dark:border-slate-800">#</th>
-                                <th class="py-3 px-4 border-b border-slate-200 dark:border-slate-800">Description / Item</th>
-                                <th class="py-3 px-4 text-right w-36 border-b border-slate-200 dark:border-slate-800">Amount ({{ currencyCode }})</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-200 dark:divide-slate-800 font-medium">
-                            <tr v-for="(item, idx) in order.invoice?.items" :key="item.id" class="hover:bg-slate-50 dark:hover:bg-slate-900/50">
-                                <td class="py-3 px-4 text-center text-slate-400 font-bold">{{ idx + 1 }}</td>
-                                <td class="py-3 px-4">
-                                    <div class="font-bold text-slate-900 dark:text-white text-sm">{{ item.description }}</div>
-                                </td>
-                                <td class="py-3 px-4 text-right font-bold text-slate-900 dark:text-white font-mono">{{ currencySymbol }}{{ Number(item.amount).toFixed(2) }}</td>
-                            </tr>
-                            <tr v-if="!order.invoice?.items || order.invoice.items.length === 0">
-                                <td colspan="3" class="py-6 text-center text-slate-400 italic">No line items added to this invoice yet.</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Invoice Totals Breakdown -->
-                <div class="flex justify-end pt-2">
-                    <div class="w-72 space-y-2 text-xs">
-                        <div class="flex items-center justify-between text-slate-600 dark:text-slate-400 font-medium">
-                            <span>Sub Total <span class="text-[10px] text-slate-400">(Tax Inclusive)</span></span>
-                            <span class="font-bold text-slate-900 dark:text-white font-mono">{{ currencySymbol }}{{ Number(order.invoice?.total || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</span>
-                        </div>
-                        <div class="flex items-center justify-between text-slate-905 dark:text-slate-100 font-medium">
-                            <span>Payments Received</span>
-                            <span class="font-bold text-emerald-600 font-mono">-{{ currencySymbol }}{{ Number(order.invoice?.paid || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</span>
-                        </div>
-                        <div class="flex items-center justify-between text-slate-900 dark:text-white text-sm font-extrabold pt-2 border-t border-slate-200 dark:border-slate-800">
-                            <span>Total</span>
-                            <span class="font-mono">{{ currencySymbol }}{{ Number(order.invoice?.total || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</span>
-                        </div>
-                        <div class="flex items-center justify-between bg-slate-100 dark:bg-slate-800/80 p-3 rounded-xl font-bold text-slate-900 dark:text-white text-sm mt-2">
-                            <span>Balance Due</span>
-                            <span class="font-mono font-black">{{ currencySymbol }}{{ Number(order.invoice?.balance || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Invoice Notes -->
-                <div class="pt-4 border-t border-slate-200 dark:border-slate-800 text-xs text-slate-500 space-y-1">
-                    <span class="font-bold text-slate-700 dark:text-slate-300">Notes</span>
-                    <p>Thanks for your business.</p>
-                </div>
-            </div>
-
-            <!-- Modal Action Buttons -->
-            <div class="flex flex-wrap justify-end gap-3 print:hidden">
-                <AppButton variant="outline" @click="showPrintInvoiceModal = false">Close</AppButton>
-
-                <AppButton variant="primary" @click="downloadInvoicePdf">
-                    <Download class="w-4 h-4" /> Download Invoice PDF
-                </AppButton>
-            </div>
-        </div>
-    </AppModal>
-
-    <!-- Printable Payment Receipt Modal -->
-    <AppModal :show="!!printingPayment" title="Payment Receipt Preview" maxWidth="xl" @close="closeReceiptModal">
-        <div v-if="printingPayment" class="space-y-6">
-            <!-- Official Receipt Print Sheet -->
-            <div id="receipt-print-area" class="p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white space-y-6 shadow-sm">
-                <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-6 border-b border-slate-200 dark:border-slate-800 pb-4">
-                    <div class="space-y-1">
-                        <img src="/logo.jpeg" alt="Bubbles Autos Logo" class="h-40 w-auto object-contain rounded-xl" />
-                        <div class="text-[10px] text-slate-600 dark:text-slate-400">
-                            <strong>{{ props.companySettings?.name || $page.props.company?.name || 'BUBBLES AUTOS' }}</strong><br />
-                            {{ props.companySettings?.address || $page.props.company?.address || '100 Shipping Way, Houston, TX 77001' }}<br />
-                            {{ props.companySettings?.email || $page.props.company?.email || 'contact@bubbleautos.com' }}
-                        </div>
-                    </div>
-                    <div class="sm:text-right">
-                        <span class="text-xs uppercase font-extrabold tracking-widest text-emerald-600">Official Payment Receipt</span>
-                        <div class="text-xs text-slate-500 font-mono mt-1">Receipt Ref: {{ printingPayment.reference || 'REC-' + printingPayment.id }}</div>
-                        <div class="text-xs text-slate-500 font-mono">Order#: {{ order.order_number }}</div>
-                    </div>
-                </div>
-
-                <div class="space-y-4 text-sm leading-relaxed">
-                    <p>Received with thanks from <strong class="text-slate-900 dark:text-white">{{ order.customer?.name }}</strong> the sum of:</p>
-                    <div class="text-3xl font-black text-emerald-600 font-mono py-2 bg-emerald-50/50 dark:bg-emerald-950/20 text-center rounded-xl border border-emerald-200/50 dark:border-emerald-900/30">
-                        {{ currencySymbol }}{{ Number(printingPayment.amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
-                    </div>
-                    
-                    <div class="grid grid-cols-2 gap-4 text-xs bg-slate-50 dark:bg-slate-850 p-4 rounded-xl border border-slate-100 dark:border-slate-800">
-                        <div>
-                            <span class="text-slate-400 block uppercase font-bold text-[10px]">Payment Date</span>
-                            <span class="font-bold text-slate-900 dark:text-white">{{ formatDateOnly(printingPayment.payment_date) }}</span>
-                        </div>
-                        <div>
-                            <span class="text-slate-400 block uppercase font-bold text-[10px]">Payment Method</span>
-                            <span class="font-bold text-slate-900 dark:text-white capitalize">{{ printingPayment.method?.replace('_', ' ') }}</span>
-                        </div>
-                        <div class="col-span-2 pt-2 border-t border-slate-200 dark:border-slate-700">
-                            <span class="text-slate-400 block uppercase font-bold text-[10px]">For Vehicle Shipment</span>
-                            <span class="font-bold text-slate-900 dark:text-white uppercase font-mono">{{ order.year }} {{ order.make }} {{ order.model }} (VIN: {{ order.vin }})</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="flex items-center justify-between text-xs text-slate-400 pt-4 border-t border-slate-200 dark:border-slate-800">
-                    <span>Recorded By: <strong>{{ printingPayment.recorded_by?.name || 'Staff' }}</strong></span>
-                    <span>Thank you for your payment!</span>
-                </div>
-            </div>
-
-            <div class="flex flex-wrap justify-end gap-3 print:hidden">
-                <AppButton variant="outline" @click="closeReceiptModal">Close</AppButton>
-
-                <AppButton variant="primary" @click="downloadReceiptPdf(printingPayment)">
-                    <Download class="w-4 h-4" /> Download Receipt PDF
-                </AppButton>
-            </div>
-        </div>
-    </AppModal>
 
     <!-- Confirm Unlink Email Modal -->
     <AppModal :show="!!unlinkingEmailConfirm" title="Confirm Unlink Email" @close="unlinkingEmailConfirm = null">
