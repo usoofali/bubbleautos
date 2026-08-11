@@ -419,7 +419,7 @@
     ]
   },
   "resources/css/app.css": {
-    "file": "assets/app-D-fzUzln.css",
+    "file": "assets/app-CQzFdoSd.css",
     "name": "app",
     "names": [
       "app.css"
@@ -428,7 +428,7 @@
     "isEntry": true
   },
   "resources/js/app.ts": {
-    "file": "assets/app-CJR3-Avq.js",
+    "file": "assets/app-CTX5XHIP.js",
     "name": "app",
     "src": "resources/js/app.ts",
     "isEntry": true,
@@ -719,7 +719,7 @@
     ]
   },
   "resources/js/pages/VehicleSales/Create.vue": {
-    "file": "assets/Create-CsSW1VQI.js",
+    "file": "assets/Create-80o0VfRv.js",
     "name": "Create",
     "src": "resources/js/pages/VehicleSales/Create.vue",
     "isDynamicEntry": true,
@@ -733,7 +733,7 @@
     ]
   },
   "resources/js/pages/VehicleSales/Edit.vue": {
-    "file": "assets/Edit-CCK3KfqM.js",
+    "file": "assets/Edit-C3ujULEZ.js",
     "name": "Edit",
     "src": "resources/js/pages/VehicleSales/Edit.vue",
     "isDynamicEntry": true,
@@ -747,13 +747,12 @@
     ]
   },
   "resources/js/pages/VehicleSales/Index.vue": {
-    "file": "assets/Index-B8QB9tC3.js",
+    "file": "assets/Index-BLIN9fFZ.js",
     "name": "Index",
     "src": "resources/js/pages/VehicleSales/Index.vue",
     "isDynamicEntry": true,
     "imports": [
       "_dist-DWQTCocZ.js",
-      "_createLucideIcon-C7KCjxdN.js",
       "_car-V6Bj9zBB.js",
       "_eye-CzkvI4Bu.js",
       "_file-text-C4a9kYIj.js",
@@ -761,13 +760,14 @@
       "_plus-CstbOXOk.js",
       "_receipt-CSX0xRQ0.js",
       "_search-CkDD9_Qn.js",
+      "_x-Vl0Jo2TR.js",
       "_AppCard-Cw-7HDpl.js",
       "_AppButton-DHoam1a-.js",
       "_AppPagination-DIw1JU00.js"
     ]
   },
   "resources/js/pages/VehicleSales/Show.vue": {
-    "file": "assets/Show-DxYEcKj8.js",
+    "file": "assets/Show-H2y_Bqt2.js",
     "name": "Show",
     "src": "resources/js/pages/VehicleSales/Show.vue",
     "isDynamicEntry": true,

@@ -16,6 +16,7 @@ import {
     Calendar,
     FilterX,
     Car,
+    X,
 } from '@lucide/vue';
 
 const props = defineProps<{
@@ -64,6 +65,17 @@ const resetFilters = () => {
     applyFilters();
 };
 
+// Debounced auto-search as user types
+let searchTimeout: ReturnType<typeof setTimeout> | null = null;
+watch(search, (newVal) => {
+    if (searchTimeout) {
+        clearTimeout(searchTimeout);
+    }
+    searchTimeout = setTimeout(() => {
+        applyFilters();
+    }, 450);
+});
+
 const downloadInvoicePdf = (saleId: number) => {
     window.location.href = `/vehicle-sales/${saleId}/invoice/pdf`;
 };
@@ -77,60 +89,52 @@ const downloadReceiptPdf = (saleId: number) => {
     <Head title="Vehicle Sales Documentation" />
 
     <div class="space-y-6">
-            <!-- Header Banner -->
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
-                <div>
-                    <h1 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2.5">
-                        <Car class="w-7 h-7 text-blue-600 dark:text-blue-400" />
-                        <span>Vehicle Sales Documentation</span>
-                    </h1>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                        Record completed sales transactions and automatically generate official Invoices and Cash Receipts.
-                    </p>
-                </div>
-                <Link href="/vehicle-sales/create">
-                    <AppButton variant="primary" size="md" class="rounded-xl font-bold shadow-sm">
-                        <Plus class="w-4 h-4 mr-1.5" />
-                        <span>+ New Vehicle Sale</span>
-                    </AppButton>
-                </Link>
+        <!-- Header Banner -->
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+            <div class="space-y-1">
+                <h1 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2.5">
+                    <Car class="w-7 h-7 text-blue-600 dark:text-blue-400" />
+                    <span>Vehicle Sales Documentation</span>
+                </h1>
+                <p class="text-xs text-slate-500 dark:text-slate-400">
+                    Record completed sales transactions and automatically generate official Invoices and Cash Receipts.
+                </p>
             </div>
 
-            <!-- Filters Bar -->
-            <AppCard>
-                <div class="flex flex-col sm:flex-row items-center gap-3">
-                    <div class="relative flex-1 w-full">
-                        <Search class="w-4 h-4 absolute left-3.5 top-3 text-slate-400" />
-                        <input
-                            v-model="search"
-                            type="text"
-                            placeholder="Search by customer name, phone, vehicle, VIN, or sale number..."
-                            class="w-full pl-10 pr-4 py-2.5 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-slate-100 placeholder-slate-400"
-                            @keyup.enter="applyFilters"
-                        />
-                    </div>
+            <!-- Integrated Search Bar -->
+            <div class="relative w-full lg:w-96 shrink-0">
+                <Search class="w-4 h-4 absolute left-3.5 top-3 text-slate-400" />
+                <input
+                    v-model="search"
+                    type="text"
+                    placeholder="Search customer name, vehicle, VIN..."
+                    class="w-full pl-10 pr-8 py-2 text-sm bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-slate-100 placeholder-slate-400"
+                />
+                <!-- Clear Button inside Search Input -->
+                <button
+                    v-if="search"
+                    @click="resetFilters"
+                    class="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+                >
+                    <X class="w-4 h-4" />
+                </button>
+            </div>
 
-                    <div class="flex items-center gap-2 shrink-0">
-                        <AppButton variant="primary" size="md" @click="applyFilters" class="rounded-xl font-bold">
-                            Search
-                        </AppButton>
-                        <button
-                            v-if="search"
-                            @click="resetFilters"
-                            class="px-3 py-2 text-xs font-bold text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition-colors flex items-center gap-1"
-                        >
-                            <FilterX class="w-3.5 h-3.5" /> Clear
-                        </button>
-                    </div>
-                </div>
+            <Link href="/vehicle-sales/create" class="w-full lg:w-auto">
+                <AppButton variant="primary" size="md" class="w-full lg:w-auto rounded-xl font-bold shadow-sm justify-center">
+                    <Plus class="w-4 h-4 mr-1.5" />
+                    <span>+ New Vehicle Sale</span>
+                </AppButton>
+            </Link>
+        </div>
 
-                <div class="mt-3 text-xs text-slate-500">
-                    Showing <strong>{{ sales.total }}</strong> vehicle sales records
-                </div>
-            </AppCard>
-
-            <!-- Sales Table -->
-            <AppCard>
+        <!-- Sales Table Card -->
+        <AppCard>
+            <template #actions>
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                    Total Records: {{ sales.total }}
+                </span>
+            </template>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-sm whitespace-nowrap">
                         <thead class="text-xs uppercase font-semibold text-slate-400 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">

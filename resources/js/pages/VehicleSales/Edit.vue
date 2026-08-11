@@ -70,20 +70,20 @@ const submit = () => {
 
     <div class="max-w-4xl mx-auto space-y-6">
         <!-- Header -->
-        <div class="flex items-center justify-between">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
             <div class="flex items-center gap-3">
                 <Link :href="`/vehicle-sales/${sale.id}`">
-                    <button class="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                    <button class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
                         <ArrowLeft class="w-5 h-5" />
                     </button>
                 </Link>
                 <div>
-                    <h1 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Edit Sale Record</h1>
+                    <h1 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">Edit Sale Record</h1>
                     <p class="text-xs text-slate-500 font-mono">Transaction No: <strong class="text-blue-600 dark:text-blue-400">{{ sale.sale_number }}</strong></p>
                 </div>
             </div>
 
-            <AppButton variant="primary" @click="submit" :loading="form.processing" class="rounded-xl font-bold shadow-sm">
+            <AppButton variant="primary" @click="submit" :loading="form.processing" class="w-full sm:w-auto rounded-xl font-bold shadow-sm justify-center">
                 <Save class="w-4 h-4 mr-1.5" /> Update Transaction
             </AppButton>
         </div>

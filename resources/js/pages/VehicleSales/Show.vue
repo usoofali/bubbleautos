@@ -170,18 +170,18 @@ const downloadReceiptPdf = (paymentId?: number) => {
                 </div>
             </div>
 
-            <div class="flex flex-wrap items-center gap-2.5">
-                <AppButton variant="outline" size="md" @click="openPaymentModal" class="rounded-xl font-bold border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-2.5 w-full sm:w-auto">
+                <AppButton v-if="sale.payment_status !== 'paid'" variant="outline" size="md" @click="openPaymentModal" class="w-full sm:w-auto rounded-xl font-bold border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 justify-center">
                     <Plus class="w-4 h-4 mr-1.5" /> Record Payment
                 </AppButton>
 
-                <Link :href="`/vehicle-sales/${sale.id}/edit`">
-                    <AppButton variant="outline" size="md" class="rounded-xl font-bold">
+                <Link :href="`/vehicle-sales/${sale.id}/edit`" class="w-full sm:w-auto">
+                    <AppButton variant="outline" size="md" class="w-full sm:w-auto rounded-xl font-bold justify-center">
                         <Pencil class="w-4 h-4 mr-1.5" /> Edit Sale
                     </AppButton>
                 </Link>
 
-                <AppButton variant="primary" size="md" @click="downloadInvoicePdf" class="rounded-xl font-bold shadow-sm">
+                <AppButton variant="primary" size="md" @click="downloadInvoicePdf" class="w-full sm:w-auto rounded-xl font-bold shadow-sm justify-center">
                     <FileText class="w-4 h-4 mr-1.5" /> Download Invoice PDF
                 </AppButton>
             </div>
@@ -255,7 +255,7 @@ const downloadReceiptPdf = (paymentId?: number) => {
         <!-- Payment Receipts History Table (Supports Multiple Receipts per Sale) -->
         <AppCard title="Cash Receipts & Installment Payment History" description="Each payment installment generates a unique cash receipt overlay document">
             <template #actions>
-                <AppButton variant="primary" size="sm" @click="openPaymentModal" class="rounded-xl font-bold">
+                <AppButton v-if="sale.payment_status !== 'paid'" variant="primary" size="sm" @click="openPaymentModal" class="rounded-xl font-bold">
                     <Plus class="w-3.5 h-3.5 mr-1" /> Record New Payment
                 </AppButton>
             </template>
