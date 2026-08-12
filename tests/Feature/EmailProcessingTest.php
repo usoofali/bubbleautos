@@ -2,9 +2,12 @@
 
 use App\Models\Customer;
 use App\Models\Role;
+use App\Models\Setting;
 use App\Models\User;
+use App\Services\EmailFetchService;
 use App\Services\EmailProcessingService;
 use App\Services\OrderService;
+use Illuminate\Support\Facades\Log;
 
 test('incoming email auto-extracts 17-character VIN and links to order', function () {
     $customer = Customer::create(['name' => 'Automated Customer', 'phone' => '+1 555-7777']);
@@ -115,4 +118,27 @@ test('staff can link an email with attachments and automatically import selected
     $invDoc = $order->documents()->where('document_type', 'invoice')->first();
     expect($invDoc)->not->toBeNull();
     expect($invDoc->file_name)->toBe('Invoice_ANK00040.pdf');
+});
+
+test('email fetch service falls back to simulated emails on connection failure and logs info in non-production environments', function () {
+    // Set up dummy credentials to test socket failure behavior
+    Setting::set('imap_username', 'dummy@yahoo.com', 'email');
+    Setting::set('imap_password', 'dummy_pass', 'email');
+    Setting::set('imap_host', '127.0.0.1', 'email');
+    Setting::set('imap_port', '9999', 'email'); // Port that won't connect
+
+    Log::shouldReceive('info')
+        ->once()
+        ->with(Mockery::on(function ($message) {
+            return str_contains($message, 'IMAP socket fetch info');
+        }));
+
+    // Ensure warning is NOT called in non-production environment
+    Log::shouldNotReceive('warning');
+
+    $fetchService = app(EmailFetchService::class);
+    $result = $fetchService->fetchLatestEmails();
+
+    expect($result)->toBeArray();
+    expect($result['target_email'])->toBe('operations@ankshipping.com');
 });

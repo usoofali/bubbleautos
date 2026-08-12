@@ -93,7 +93,8 @@
             top: 866px;
             left: 120px;
             width: 480px;
-            font-size: 34px5 font-weight: 900;
+            font-size: 34px;
+            font-weight: bold;
             letter-spacing: 2px;
         }
     </style>

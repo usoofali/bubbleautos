@@ -41,7 +41,11 @@ class EmailFetchService
                 ];
             }
 
-            Log::warning('IMAP socket fetch warning: '.$socketResult['message']);
+            if (app()->environment('production')) {
+                Log::warning('IMAP socket fetch warning: '.$socketResult['message']);
+            } else {
+                Log::info('IMAP socket fetch info (simulated fallback activated): '.$socketResult['message']);
+            }
         }
 
         // 2. Fallback / Simulated fetch for operations@ankshipping.com if offline or test env
@@ -111,7 +115,7 @@ class EmailFetchService
         $protocol = strtolower($encryption) === 'ssl' ? 'ssl://' : (strtolower($encryption) === 'tls' ? 'tls://' : '');
         $address = $protocol.$host;
 
-        $fp = @fsockopen($address, (int) $port, $errno, $errstr, 15);
+        $fp = @fsockopen($address, (int) $port, $errno, $errstr, 5);
 
         if (! $fp) {
             return [

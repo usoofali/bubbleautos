@@ -102,7 +102,7 @@
             left: 45px;
             width: 50px;
             text-align: center;
-            font-size: 14px;
+            font-size: 20px;
             font-weight: bold;
         }
 
@@ -111,7 +111,7 @@
             left: 110px;
             width: 70px;
             text-align: center;
-            font-size: 14px;
+            font-size: 20px;
             font-weight: bold;
         }
 
@@ -119,38 +119,45 @@
             top: 560px;
             left: 230px;
             width: 500px;
-            font-size: 14px;
+            font-size: 20px;
             font-weight: bold;
             line-height: 1.3;
         }
 
-        .rate-col {
-            top: 560px;
-            left: 724px;
-            width: 120px;
-            text-align: right;
-            font-size: 16px;
+        .description-col {
+            top: 599px;
+            left: 230px;
+            width: 500px;
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .chassis-col {
+            top: 695px;
+            left: 230px;
+            width: 500px;
+            font-size: 20px;
             font-weight: bold;
+            line-height: 1.3;
         }
 
         .amount-col {
             top: 560px;
-            left: 845px;
+            left: 860px;
             width: 130px;
             text-align: right;
-            font-size: 16px;
+            font-size: 20px;
             font-weight: bold;
         }
 
         /* Total Box */
         .total-box {
             top: 1180px;
-            left: 850px;
+            left: 860px;
             width: 130px;
             text-align: right;
-            font-size: 19px;
-            font-weight: 900;
-            color: #000000;
+            font-size: 20px;
+            font-weight: bold;
         }
 
         /* Amount in Words Line */
@@ -209,18 +216,19 @@
     <div class="overlay-text sn-col">1</div>
     <div class="overlay-text qty-col">1</div>
     <div class="overlay-text desc-col">
-        {{ trim(($sale->vehicle_year ? $sale->vehicle_year . ' ' : '') . $sale->vehicle_make . ' ' . $sale->vehicle_model) }}
+        {{ $sale->vehicle_make . ' ' . $sale->vehicle_model . ' ' . $sale->vehicle_year . ' Model' }}
         @if($sale->vehicle_color)
             ({{ $sale->vehicle_color }})
         @endif
-        @if($sale->vehicle_vin)
-            - VIN: {{ $sale->vehicle_vin }}
-        @endif
-        @if($sale->vehicle_description)
-            <br /><span style="font-size: 15px; font-weight: normal;">{{ $sale->vehicle_description }}</span>
-        @endif
+
     </div>
-    <div class="overlay-text rate-col">N{{ number_format($sale->sale_amount, 2) }}</div>
+    @if($sale->vehicle_description)
+        <div class="overlay-text description-col">{{ $sale->vehicle_description }}</div>
+    @endif
+    @if($sale->vehicle_vin)
+        <div class="overlay-text chassis-col">CHASSIS/VIN: {{ $sale->vehicle_vin }}</div>
+    @endif
+
     <div class="overlay-text amount-col">N{{ number_format($sale->sale_amount, 2) }}</div>
 
     <!-- Total -->
