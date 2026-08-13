@@ -129,3 +129,35 @@ test('user can download cash receipt pdf for a specific payment installment', fu
     $response->assertStatus(200);
     $response->assertHeader('content-type', 'application/pdf');
 });
+
+test('user can delete vehicle sale and its payment receipts', function () {
+    $user = User::factory()->create();
+    $sale = VehicleSale::create([
+        'sale_number' => '0001',
+        'customer_name' => 'John Doe',
+        'vehicle_make' => 'Toyota',
+        'vehicle_model' => 'Camry',
+        'sale_date' => '2026-08-10',
+        'sale_amount' => 35000000,
+        'amount_paid' => 35000000,
+    ]);
+
+    $payment = $sale->payments()->create([
+        'receipt_number' => '0001',
+        'amount_paid' => 35000000,
+        'payment_date' => '2026-08-10',
+        'payment_method' => 'bank_transfer',
+    ]);
+
+    $response = $this->actingAs($user)->delete("/vehicle-sales/{$sale->id}");
+
+    $response->assertRedirect('/vehicle-sales');
+
+    $this->assertSoftDeleted('vehicle_sales', [
+        'id' => $sale->id,
+    ]);
+
+    $this->assertDatabaseMissing('vehicle_sale_payments', [
+        'id' => $payment->id,
+    ]);
+});

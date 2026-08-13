@@ -229,16 +229,16 @@ class OrderController extends Controller
         $this->authorize('delete', $order);
 
         $orderNumber = $order->order_number;
-        $order->delete();
+        $order->forceDelete();
 
         ActivityLogService::log(
             'order.deleted',
-            "Deleted order {$orderNumber}",
+            "Permanently deleted order {$orderNumber}",
             Order::class,
             $order->id
         );
 
         return redirect()->route('orders.index')
-            ->with('success', "Order {$orderNumber} deleted successfully.");
+            ->with('success', "Order {$orderNumber} permanently deleted.");
     }
 }

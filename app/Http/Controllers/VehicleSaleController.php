@@ -209,10 +209,11 @@ class VehicleSaleController extends Controller
      */
     public function destroy(VehicleSale $vehicleSale): RedirectResponse
     {
+        $vehicleSale->payments()->delete();
         $vehicleSale->delete();
 
         return redirect()->route('vehicle-sales.index')
-            ->with('success', 'Vehicle sale transaction deleted successfully.');
+            ->with('success', 'Vehicle sale transaction and its payment records deleted successfully.');
     }
 
     /**

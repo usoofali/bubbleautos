@@ -61,18 +61,27 @@ const orderForm = useForm({
 });
 
 const submitCreateOrder = () => {
-    if (!createNewCustomer.value) {
-        orderForm.new_customer = { name: '', phone: '', email: '' };
-    }
-    orderForm.post('/orders', {
-        onSuccess: () => {
-            showCreateModal.value = false;
-            orderForm.reset();
-            createNewCustomer.value = false;
-            showOptionalFields.value = false;
-            showToast.success('Order registered successfully!');
-        },
-    });
+    orderForm
+        .transform((data) => ({
+            ...data,
+            customer_id: createNewCustomer.value ? null : (data.customer_id || null),
+            new_customer: createNewCustomer.value && data.new_customer?.name ? data.new_customer : null,
+        }))
+        .post('/orders', {
+            onSuccess: () => {
+                showCreateModal.value = false;
+                orderForm.reset();
+                createNewCustomer.value = false;
+                showOptionalFields.value = false;
+                showToast.success('Order registered successfully!');
+            },
+            onError: (errors) => {
+                const firstError = Object.values(errors)[0];
+                if (firstError) {
+                    showToast.error(firstError);
+                }
+            },
+        });
 };
 
 // Delete Order Confirmation Modal
@@ -82,7 +91,7 @@ const confirmDeleteOrder = () => {
     router.delete(`/orders/${deletingOrder.value.id}`, {
         onSuccess: () => {
             deletingOrder.value = null;
-            showToast.success('Order soft deleted.');
+            showToast.success('Order deleted.');
         },
     });
 };
@@ -315,9 +324,9 @@ const confirmDeleteOrder = () => {
     <!-- Delete Confirmation Modal -->
     <ConfirmModal
         :show="!!deletingOrder"
-        title="Delete Vehicle Order"
-        :message="`Are you sure you want to soft delete order ${deletingOrder?.order_number}?`"
-        confirm-text="Delete Order"
+        title="Permanently Delete Vehicle Order"
+        :message="`Are you sure you want to permanently delete order ${deletingOrder?.order_number}? This action cannot be undone.`"
+        confirm-text="Permanently Delete Order"
         variant="danger"
         @close="deletingOrder = null"
         @confirm="confirmDeleteOrder"

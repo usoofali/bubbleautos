@@ -5,6 +5,15 @@ import AppCard from '@/components/common/AppCard.vue';
 import AppButton from '@/components/common/AppButton.vue';
 import AppInput from '@/components/common/AppInput.vue';
 import AppPagination from '@/components/common/AppPagination.vue';
+import ConfirmModal from '@/components/common/ConfirmModal.vue';
+import { showToast } from '@/components/common/AppToast.vue';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import {
     Plus,
     Search,
@@ -17,6 +26,8 @@ import {
     FilterX,
     Car,
     X,
+    MoreVertical,
+    Trash2,
 } from '@lucide/vue';
 
 const props = defineProps<{
@@ -82,6 +93,19 @@ const downloadInvoicePdf = (saleId: number) => {
 
 const downloadReceiptPdf = (saleId: number) => {
     window.location.href = `/vehicle-sales/${saleId}/receipt/pdf`;
+};
+
+// Deletion logic
+const deletingSale = ref<any>(null);
+
+const confirmDeleteSale = () => {
+    if (!deletingSale.value) return;
+    router.delete(`/vehicle-sales/${deletingSale.value.id}`, {
+        onSuccess: () => {
+            deletingSale.value = null;
+            showToast.success('Vehicle sale and payment records deleted successfully.');
+        },
+    });
 };
 </script>
 
@@ -175,35 +199,43 @@ const downloadReceiptPdf = (saleId: number) => {
                                     {{ new Date(s.sale_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) }}
                                 </td>
                                 <td class="py-3.5 px-4 text-right">
-                                    <div class="flex items-center justify-end gap-1.5">
-                                        <Link :href="`/vehicle-sales/${s.id}`" title="View Sale">
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger as-child>
                                             <button class="p-1.5 text-slate-500 hover:text-slate-900 dark:hover:text-white rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-                                                <Eye class="w-4 h-4" />
+                                                <MoreVertical class="w-4 h-4" />
                                             </button>
-                                        </Link>
-
-                                        <Link :href="`/vehicle-sales/${s.id}/edit`" title="Edit Sale">
-                                            <button class="p-1.5 text-blue-600 hover:text-blue-800 dark:text-blue-400 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-colors">
-                                                <Pencil class="w-4 h-4" />
-                                            </button>
-                                        </Link>
-
-                                        <button
-                                            @click="downloadInvoicePdf(s.id)"
-                                            class="p-1.5 text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-950/40 transition-colors"
-                                            title="Download Invoice PDF"
-                                        >
-                                            <FileText class="w-4 h-4" />
-                                        </button>
-
-                                        <button
-                                            @click="downloadReceiptPdf(s.id)"
-                                            class="p-1.5 text-emerald-600 hover:text-emerald-800 dark:text-emerald-400 rounded-lg hover:bg-emerald-50 dark:hover:bg-emerald-950/40 transition-colors"
-                                            title="Download Cash Receipt PDF"
-                                        >
-                                            <Receipt class="w-4 h-4" />
-                                        </button>
-                                    </div>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent align="end" class="w-52">
+                                            <DropdownMenuItem as-child>
+                                                <Link :href="`/vehicle-sales/${s.id}`" class="flex items-center gap-2 cursor-pointer w-full">
+                                                    <Eye class="w-4 h-4 text-slate-500" />
+                                                    <span>View Sale</span>
+                                                </Link>
+                                            </DropdownMenuItem>
+                                            <DropdownMenuItem as-child>
+                                                <Link :href="`/vehicle-sales/${s.id}/edit`" class="flex items-center gap-2 cursor-pointer w-full">
+                                                    <Pencil class="w-4 h-4 text-blue-500" />
+                                                    <span>Edit Sale</span>
+                                                </Link>
+                                            </DropdownMenuItem>
+                                            <DropdownMenuItem @click="downloadInvoicePdf(s.id)" class="flex items-center gap-2 cursor-pointer">
+                                                <FileText class="w-4 h-4 text-indigo-500" />
+                                                <span>Download Invoice</span>
+                                            </DropdownMenuItem>
+                                            <DropdownMenuItem @click="downloadReceiptPdf(s.id)" class="flex items-center gap-2 cursor-pointer">
+                                                <Receipt class="w-4 h-4 text-emerald-500" />
+                                                <span>Download Receipt</span>
+                                            </DropdownMenuItem>
+                                            <DropdownMenuSeparator />
+                                            <DropdownMenuItem
+                                                @click="deletingSale = s"
+                                                class="flex items-center gap-2 cursor-pointer text-red-600 dark:text-red-400 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-950/40"
+                                            >
+                                                <Trash2 class="w-4 h-4 text-red-600 dark:text-red-400" />
+                                                <span>Delete Sale & Payments</span>
+                                            </DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
                                 </td>
                             </tr>
 
@@ -221,4 +253,15 @@ const downloadReceiptPdf = (saleId: number) => {
                 </div>
             </AppCard>
         </div>
+
+    <!-- Delete Confirmation Modal -->
+    <ConfirmModal
+        :show="!!deletingSale"
+        title="Delete Vehicle Sale"
+        :message="`Are you sure you want to delete vehicle sale ${deletingSale?.sale_number} (${deletingSale?.customer_name}) and all associated payment receipts? This action cannot be undone.`"
+        confirm-text="Delete Sale & Payments"
+        variant="danger"
+        @close="deletingSale = null"
+        @confirm="confirmDeleteSale"
+    />
 </template>

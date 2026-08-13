@@ -35,3 +35,53 @@ test('staff can create order with auto-generated order number and auto-created b
     expect((float) $order->invoice->total)->toEqual(0);
     expect($order->timelineEvents)->not->toBeEmpty();
 });
+
+test('staff with permission can permanently delete an order', function () {
+    $adminRole = Role::create(['name' => 'Administrator', 'slug' => 'admin']);
+    $user = User::factory()->create(['role_id' => $adminRole->id]);
+
+    $customer = Customer::create([
+        'name' => 'John Doe',
+        'phone' => '+1 555-1234',
+    ]);
+
+    $order = Order::create([
+        'order_number' => 'BA-00002',
+        'vin' => '1FA6P8CF0H5999999',
+        'customer_id' => $customer->id,
+    ]);
+
+    $response = $this->actingAs($user)->delete("/orders/{$order->id}");
+
+    $response->assertRedirect('/orders');
+
+    $this->assertDatabaseMissing('orders', [
+        'id' => $order->id,
+    ]);
+});
+
+test('staff can create order by registering a new inline customer', function () {
+    $adminRole = Role::create(['name' => 'Administrator', 'slug' => 'admin']);
+    $user = User::factory()->create(['role_id' => $adminRole->id]);
+
+    $response = $this->actingAs($user)->post('/orders', [
+        'new_customer' => [
+            'name' => 'Jane Smith',
+            'phone' => '+1 555-9876',
+            'email' => 'jane@example.com',
+        ],
+        'vin' => '1FA6P8CF0H5111111',
+        'make' => 'Ford',
+        'model' => 'Mustang',
+        'year' => 2022,
+    ]);
+
+    $response->assertRedirect();
+
+    $customer = Customer::where('name', 'Jane Smith')->first();
+    expect($customer)->not->toBeNull();
+
+    $order = Order::where('vin', '1FA6P8CF0H5111111')->first();
+    expect($order)->not->toBeNull();
+    expect($order->customer_id)->toBe($customer->id);
+});
