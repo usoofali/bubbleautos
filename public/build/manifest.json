@@ -103,6 +103,15 @@
       "_AppModal-CACy6KSz.js"
     ]
   },
+  "_DropdownMenuTrigger-DMxtzvjQ.js": {
+    "file": "assets/DropdownMenuTrigger-DMxtzvjQ.js",
+    "name": "DropdownMenuTrigger",
+    "imports": [
+      "_RovingFocusGroup-CRI_HkPz.js",
+      "_dist-DWQTCocZ.js",
+      "_shared-D6nytwmm.js"
+    ]
+  },
   "_FileUploader-s_bDo0Y2.js": {
     "file": "assets/FileUploader-s_bDo0Y2.js",
     "name": "FileUploader",
@@ -120,31 +129,32 @@
       "_dist-DWQTCocZ.js"
     ]
   },
-  "_Label-ByVNqWMo.js": {
-    "file": "assets/Label-ByVNqWMo.js",
+  "_Label-u2qUxy7y.js": {
+    "file": "assets/Label-u2qUxy7y.js",
     "name": "Label",
     "imports": [
       "_dist-DWQTCocZ.js",
-      "_button-Kl3Zs7Ha.js"
+      "_shared-D6nytwmm.js",
+      "_button-Dbb4kQkM.js"
     ]
   },
-  "_PasswordInput-VG4NBypL.js": {
-    "file": "assets/PasswordInput-VG4NBypL.js",
+  "_PasswordInput-DsDIyX5s.js": {
+    "file": "assets/PasswordInput-DsDIyX5s.js",
     "name": "PasswordInput",
     "imports": [
       "_dist-DWQTCocZ.js",
-      "_button-Kl3Zs7Ha.js",
-      "_Label-ByVNqWMo.js",
+      "_shared-D6nytwmm.js",
+      "_Label-u2qUxy7y.js",
       "_createLucideIcon-C7KCjxdN.js",
       "_eye-CzkvI4Bu.js"
     ]
   },
-  "_RovingFocusGroup-DNfjSDKL.js": {
-    "file": "assets/RovingFocusGroup-DNfjSDKL.js",
+  "_RovingFocusGroup-CRI_HkPz.js": {
+    "file": "assets/RovingFocusGroup-CRI_HkPz.js",
     "name": "RovingFocusGroup",
     "imports": [
       "_dist-DWQTCocZ.js",
-      "_button-Kl3Zs7Ha.js"
+      "_shared-D6nytwmm.js"
     ]
   },
   "_TextLink-BSnkUwmL.js": {
@@ -154,6 +164,14 @@
       "_dist-DWQTCocZ.js"
     ]
   },
+  "_VisuallyHidden-ekcny-gS.js": {
+    "file": "assets/VisuallyHidden-ekcny-gS.js",
+    "name": "VisuallyHidden",
+    "imports": [
+      "_dist-DWQTCocZ.js",
+      "_shared-D6nytwmm.js"
+    ]
+  },
   "_arrow-right-CsBca1Ya.js": {
     "file": "assets/arrow-right-CsBca1Ya.js",
     "name": "arrow-right",
@@ -161,11 +179,12 @@
       "_createLucideIcon-C7KCjxdN.js"
     ]
   },
-  "_button-Kl3Zs7Ha.js": {
-    "file": "assets/button-Kl3Zs7Ha.js",
+  "_button-Dbb4kQkM.js": {
+    "file": "assets/button-Dbb4kQkM.js",
     "name": "button",
     "imports": [
-      "_dist-DWQTCocZ.js"
+      "_dist-DWQTCocZ.js",
+      "_shared-D6nytwmm.js"
     ]
   },
   "_car-V6Bj9zBB.js": {
@@ -298,12 +317,12 @@
       "_createLucideIcon-C7KCjxdN.js"
     ]
   },
-  "_password-DkGPgieD.js": {
-    "file": "assets/password-DkGPgieD.js",
+  "_password-BZxpn-dW.js": {
+    "file": "assets/password-BZxpn-dW.js",
     "name": "password",
     "imports": [
       "_dist-DWQTCocZ.js",
-      "_button-Kl3Zs7Ha.js",
+      "_shared-D6nytwmm.js",
       "_loader-circle-DLetvXTt.js",
       "_wayfinder-Dp7PqxvV.js"
     ]
@@ -364,6 +383,13 @@
       "_createLucideIcon-C7KCjxdN.js"
     ]
   },
+  "_shared-D6nytwmm.js": {
+    "file": "assets/shared-D6nytwmm.js",
+    "name": "shared",
+    "imports": [
+      "_dist-DWQTCocZ.js"
+    ]
+  },
   "_shield-check-vin_wla-.js": {
     "file": "assets/shield-check-vin_wla-.js",
     "name": "shield-check",
@@ -419,7 +445,7 @@
     ]
   },
   "resources/css/app.css": {
-    "file": "assets/app-CQzFdoSd.css",
+    "file": "assets/app-B9063GeO.css",
     "name": "app",
     "names": [
       "app.css"
@@ -428,15 +454,18 @@
     "isEntry": true
   },
   "resources/js/app.ts": {
-    "file": "assets/app-DFfY14zA.js",
+    "file": "assets/app-CKc9A-U0.js",
     "name": "app",
     "src": "resources/js/app.ts",
     "isEntry": true,
     "imports": [
-      "_RovingFocusGroup-DNfjSDKL.js",
+      "_RovingFocusGroup-CRI_HkPz.js",
       "_dist-DWQTCocZ.js",
       "_sun-5quHOyJv.js",
-      "_button-Kl3Zs7Ha.js",
+      "_shared-D6nytwmm.js",
+      "_button-Dbb4kQkM.js",
+      "_DropdownMenuTrigger-DMxtzvjQ.js",
+      "_VisuallyHidden-ekcny-gS.js",
       "_createLucideIcon-C7KCjxdN.js",
       "_car-V6Bj9zBB.js",
       "_circle-check-Bb70bd5t.js",
@@ -598,7 +627,7 @@
     ]
   },
   "resources/js/pages/Orders/Index.vue": {
-    "file": "assets/Index-BBaXaDSu.js",
+    "file": "assets/Index-CGAUHjly.js",
     "name": "Index",
     "src": "resources/js/pages/Orders/Index.vue",
     "isDynamicEntry": true,
@@ -747,12 +776,14 @@
     ]
   },
   "resources/js/pages/VehicleSales/Index.vue": {
-    "file": "assets/Index-BLIN9fFZ.js",
+    "file": "assets/Index-D7d3f7op.js",
     "name": "Index",
     "src": "resources/js/pages/VehicleSales/Index.vue",
     "isDynamicEntry": true,
     "imports": [
       "_dist-DWQTCocZ.js",
+      "_DropdownMenuTrigger-DMxtzvjQ.js",
+      "_createLucideIcon-C7KCjxdN.js",
       "_car-V6Bj9zBB.js",
       "_eye-CzkvI4Bu.js",
       "_file-text-C4a9kYIj.js",
@@ -760,10 +791,12 @@
       "_plus-CstbOXOk.js",
       "_receipt-CSX0xRQ0.js",
       "_search-CkDD9_Qn.js",
+      "_ConfirmModal-YUIkQ0sT.js",
       "_x-Vl0Jo2TR.js",
       "_AppCard-Cw-7HDpl.js",
       "_AppButton-DHoam1a-.js",
-      "_AppPagination-DIw1JU00.js"
+      "_AppPagination-DIw1JU00.js",
+      "_AppToast.vue_vue_type_script_lang-C0WIlPuE.js"
     ]
   },
   "resources/js/pages/VehicleSales/Show.vue": {
@@ -810,38 +843,40 @@
     ]
   },
   "resources/js/pages/auth/ForgotPassword.vue": {
-    "file": "assets/ForgotPassword-BgcQW9xD.js",
+    "file": "assets/ForgotPassword-B0W1q5lA.js",
     "name": "ForgotPassword",
     "src": "resources/js/pages/auth/ForgotPassword.vue",
     "isDynamicEntry": true,
     "imports": [
       "_dist-DWQTCocZ.js",
-      "_button-Kl3Zs7Ha.js",
-      "_Label-ByVNqWMo.js",
+      "_button-Dbb4kQkM.js",
+      "_Label-u2qUxy7y.js",
       "_routes-ie8Wv0Jq.js",
       "_TextLink-BSnkUwmL.js",
-      "_password-DkGPgieD.js"
+      "_password-BZxpn-dW.js"
     ]
   },
   "resources/js/pages/auth/Login.vue": {
-    "file": "assets/Login-9wb7qOOd.js",
+    "file": "assets/Login-DVSVmRq8.js",
     "name": "Login",
     "src": "resources/js/pages/auth/Login.vue",
     "isDynamicEntry": true,
     "imports": [
-      "_RovingFocusGroup-DNfjSDKL.js",
+      "_RovingFocusGroup-CRI_HkPz.js",
       "_dist-DWQTCocZ.js",
-      "_button-Kl3Zs7Ha.js",
-      "_Label-ByVNqWMo.js",
+      "_shared-D6nytwmm.js",
+      "_button-Dbb4kQkM.js",
+      "_VisuallyHidden-ekcny-gS.js",
+      "_Label-u2qUxy7y.js",
       "_createLucideIcon-C7KCjxdN.js",
       "_check-BzcNIwsM.js",
-      "_PasswordInput-VG4NBypL.js",
+      "_PasswordInput-DsDIyX5s.js",
       "_lock-V8utrDQh.js",
       "_mail-zLvJiqOW.js",
       "_shield-check-vin_wla-.js",
       "_wayfinder-Dp7PqxvV.js",
       "_TextLink-BSnkUwmL.js",
-      "_password-DkGPgieD.js"
+      "_password-BZxpn-dW.js"
     ]
   },
   "resources/js/pages/auth/Register.vue": {
@@ -854,16 +889,16 @@
     ]
   },
   "resources/js/pages/auth/ResetPassword.vue": {
-    "file": "assets/ResetPassword-C_h8h0br.js",
+    "file": "assets/ResetPassword--hrodx3M.js",
     "name": "ResetPassword",
     "src": "resources/js/pages/auth/ResetPassword.vue",
     "isDynamicEntry": true,
     "imports": [
       "_dist-DWQTCocZ.js",
-      "_button-Kl3Zs7Ha.js",
-      "_Label-ByVNqWMo.js",
-      "_PasswordInput-VG4NBypL.js",
-      "_password-DkGPgieD.js"
+      "_button-Dbb4kQkM.js",
+      "_Label-u2qUxy7y.js",
+      "_PasswordInput-DsDIyX5s.js",
+      "_password-BZxpn-dW.js"
     ]
   },
   "resources/js/pages/settings/Appearance.vue": {
@@ -880,30 +915,30 @@
     ]
   },
   "resources/js/pages/settings/Profile.vue": {
-    "file": "assets/Profile-lIHxQxpv.js",
+    "file": "assets/Profile-u-czLJvg.js",
     "name": "Profile",
     "src": "resources/js/pages/settings/Profile.vue",
     "isDynamicEntry": true,
     "imports": [
       "_dist-DWQTCocZ.js",
-      "_button-Kl3Zs7Ha.js",
-      "_Label-ByVNqWMo.js",
+      "_button-Dbb4kQkM.js",
+      "_Label-u2qUxy7y.js",
       "_wayfinder-Dp7PqxvV.js",
       "_profile-uNtLFEsD.js",
       "_Heading-BHYXZhNt.js"
     ]
   },
   "resources/js/pages/settings/Security.vue": {
-    "file": "assets/Security-nY-1fMgr.js",
+    "file": "assets/Security-Dpj-cNID.js",
     "name": "Security",
     "src": "resources/js/pages/settings/Security.vue",
     "isDynamicEntry": true,
     "imports": [
       "_dist-DWQTCocZ.js",
-      "_button-Kl3Zs7Ha.js",
-      "_Label-ByVNqWMo.js",
+      "_button-Dbb4kQkM.js",
+      "_Label-u2qUxy7y.js",
       "_createLucideIcon-C7KCjxdN.js",
-      "_PasswordInput-VG4NBypL.js",
+      "_PasswordInput-DsDIyX5s.js",
       "_shield-check-vin_wla-.js",
       "_wayfinder-Dp7PqxvV.js",
       "_Heading-BHYXZhNt.js"
