@@ -297,10 +297,22 @@
         </tr>
     </table>
 
-    <!-- Notes -->
-    <div class="footer-notes">
-        <strong style="color: #1e3a8a;">Notes & Instructions:</strong><br />
-        Thank you for doing business with Bubbles Autos. All vehicle shipment inquiries should reference Order# {{ $order->order_number }}.
-    </div>
+    <!-- Notes & Signature -->
+    <table style="width: 100%; margin-top: 10px;">
+        <tr>
+            <td style="width: 60%; vertical-align: top;">
+                <div class="footer-notes">
+                    <strong style="color: #1e3a8a;">Notes & Instructions:</strong><br />
+                    Thank you for doing business with Bubbles Autos. All vehicle shipment inquiries should reference Order# {{ $order->order_number }}.
+                </div>
+            </td>
+            <td style="width: 40%; text-align: right; vertical-align: bottom; padding-left: 20px;">
+                @if(file_exists(public_path('sign.png')))
+                    <img src="{{ public_path('sign.png') }}" style="max-height: 55px; width: auto; display: inline-block;" alt="Authorized Signature" /><br />
+                    <div style="font-size: 10px; font-weight: bold; color: #1e3a8a; text-transform: uppercase; margin-top: 2px;">Authorized Signatory</div>
+                @endif
+            </td>
+        </tr>
+    </table>
 </body>
 </html>

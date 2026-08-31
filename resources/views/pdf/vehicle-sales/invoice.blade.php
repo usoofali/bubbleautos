@@ -186,12 +186,26 @@
             letter-spacing: 12px;
             transform: rotate(-25deg);
         }
+
+        /* Signature Image Overlay */
+        .signature-img {
+            position: absolute;
+            top: 1250px;
+            left: 710px;
+            width: 250px;
+            height: auto;
+            z-index: 15;
+        }
     </style>
 </head>
 
 <body>
     @if(file_exists(public_path('invoice.png')))
         <img src="{{ public_path('invoice.png') }}" class="bg-template" alt="Invoice Template" />
+    @endif
+
+    @if(file_exists(public_path('sign.png')))
+        <img src="{{ public_path('sign.png') }}" class="signature-img" alt="Authorized Signature" />
     @endif
 
     @if(($sale->payment_status ?? 'unpaid') === 'paid')

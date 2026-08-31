@@ -204,11 +204,14 @@
     <!-- Footer Row -->
     <table class="footer-table">
         <tr>
-            <td style="width: 50%;">
+            <td style="width: 50%; vertical-align: bottom;">
                 Recorded By: <strong style="color: #0f172a;">{{ $payment->recorder->name ?? 'Staff' }}</strong>
             </td>
-            <td style="width: 50%; text-align: right; font-weight: bold; color: #047857;">
-                Thank you for your payment!
+            <td style="width: 50%; text-align: right; vertical-align: bottom;">
+                @if(file_exists(public_path('sign.png')))
+                    <img src="{{ public_path('sign.png') }}" style="max-height: 55px; width: auto; display: inline-block;" alt="Authorized Signature" /><br />
+                @endif
+                <span style="font-weight: bold; color: #047857;">Thank you for your payment!</span>
             </td>
         </tr>
     </table>

@@ -97,12 +97,26 @@
             font-weight: bold;
             letter-spacing: 2px;
         }
+
+        /* Signature Image Overlay */
+        .signature-img {
+            position: absolute;
+            top: 800px;
+            left: 1080px;
+            width: 250px;
+            height: auto;
+            z-index: 15;
+        }
     </style>
 </head>
 
 <body>
     @if(file_exists(public_path('receipt.png')))
         <img src="{{ public_path('receipt.png') }}" class="bg-template" alt="Receipt Template" />
+    @endif
+
+    @if(file_exists(public_path('sign.png')))
+        <img src="{{ public_path('sign.png') }}" class="signature-img" alt="Authorized Signature" />
     @endif
 
     <!-- Overlay Fields -->
