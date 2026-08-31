@@ -40,9 +40,17 @@ class OrderController extends Controller
         $orders = $query->orderBy('created_at', 'desc')->paginate(12)->withQueryString();
         $customers = Customer::orderBy('name')->get(['id', 'name', 'phone']);
 
+        $stats = [
+            'total' => Order::count(),
+            'this_month' => Order::whereYear('created_at', now()->year)->whereMonth('created_at', now()->month)->count(),
+            'in_transit' => Order::where('status', ShipmentStatus::IN_TRANSIT->value)->count(),
+            'delivered' => Order::where('status', ShipmentStatus::DELIVERED->value)->count(),
+        ];
+
         return Inertia::render('Orders/Index', [
             'orders' => $orders,
             'customers' => $customers,
+            'stats' => $stats,
             'filters' => [
                 'search' => $search,
                 'status' => $status,

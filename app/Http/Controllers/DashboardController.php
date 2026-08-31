@@ -21,11 +21,14 @@ class DashboardController extends Controller
         $user = $request->user();
 
         // Metric Widgets
+        $totalOrders = Order::count();
         $ordersInTransit = Order::where('status', ShipmentStatus::IN_TRANSIT)->count();
         $deliveredOrders = Order::where('status', ShipmentStatus::DELIVERED)->count();
 
+        $totalInvoiced = Invoice::sum('total');
+        $totalPaid = Invoice::sum('paid');
         $outstandingInvoicesCount = Invoice::where('status', '!=', InvoiceStatus::PAID)->count();
-        $outstandingInvoicesTotal = Invoice::where('status', '!=', InvoiceStatus::PAID)->sum('balance');
+        $outstandingInvoicesTotal = Invoice::sum('balance');
 
         $pendingDocuments = Document::whereNull('file_path')->orWhere('file_path', '')->count();
         $emailsToReview = Email::where('processing_status', EmailStatus::NEEDS_REVIEW)->count();
@@ -44,8 +47,11 @@ class DashboardController extends Controller
 
         return Inertia::render('Dashboard', [
             'metrics' => [
+                'total_orders' => $totalOrders,
                 'orders_in_transit' => $ordersInTransit,
                 'delivered_orders' => $deliveredOrders,
+                'total_invoiced' => (float) $totalInvoiced,
+                'total_paid' => (float) $totalPaid,
                 'outstanding_invoices_count' => $outstandingInvoicesCount,
                 'outstanding_invoices_total' => (float) $outstandingInvoicesTotal,
                 'emails_to_review' => $emailsToReview,

@@ -85,3 +85,29 @@ test('staff can create order by registering a new inline customer', function () 
     expect($order)->not->toBeNull();
     expect($order->customer_id)->toBe($customer->id);
 });
+
+test('staff can view orders listing page with total orders and status metrics', function () {
+    $adminRole = Role::create(['name' => 'Administrator', 'slug' => 'admin']);
+    $user = User::factory()->create(['role_id' => $adminRole->id]);
+
+    $customer = Customer::create(['name' => 'Metrics Test Customer', 'phone' => '+1 555-0000']);
+    Order::create([
+        'order_number' => 'BA-00003',
+        'vin' => '1FA6P8CF0H5222222',
+        'customer_id' => $customer->id,
+        'status' => 'in_transit',
+    ]);
+
+    $response = $this->actingAs($user)->get('/orders');
+
+    $response->assertOk();
+    $response->assertInertia(fn ($page) => $page
+        ->component('Orders/Index')
+        ->has('stats', fn ($stats) => $stats
+            ->where('total', 1)
+            ->where('this_month', 1)
+            ->where('in_transit', 1)
+            ->where('delivered', 0)
+        )
+    );
+});

@@ -14,13 +14,19 @@ import AppPagination from '@/components/common/AppPagination.vue';
 import AppTable from '@/components/common/AppTable.vue';
 import FileUploader from '@/components/common/FileUploader.vue';
 import { showToast } from '@/components/common/AppToast.vue';
-import { Plus, Search, Car, ArrowRight, Trash2, FileText, ChevronDown, ChevronUp, X, Filter } from '@lucide/vue';
+import { Plus, Search, Car, ArrowRight, Trash2, FileText, ChevronDown, ChevronUp, X, Filter, ShoppingBag, Calendar, CheckCircle2 } from '@lucide/vue';
 
 interface Props {
     orders: any;
     customers: any[];
     filters: { search: string; status: string };
     statusOptions: Array<{ value: string; label: string }>;
+    stats?: {
+        total: number;
+        this_month: number;
+        in_transit: number;
+        delivered: number;
+    };
 }
 
 const props = defineProps<Props>();
@@ -108,6 +114,65 @@ const confirmDeleteOrder = () => {
                 </AppButton>
             </template>
         </AppPageHeader>
+
+        <!-- Metric Summary Cards Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+            <!-- Total Orders Card -->
+            <AppCard no-padding hoverable class="p-5 sm:p-6 group border-slate-200/80 dark:border-slate-800/80">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Total Orders</span>
+                    <div class="w-11 h-11 rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shadow-2xs group-hover:scale-110 transition-transform">
+                        <ShoppingBag class="w-5 h-5" />
+                    </div>
+                </div>
+                <div class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mb-1 tracking-tight">
+                    {{ stats?.total ?? orders?.total ?? 0 }}
+                </div>
+                <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Total registered vehicle orders</p>
+            </AppCard>
+
+            <!-- Orders This Month Card -->
+            <AppCard no-padding hoverable class="p-5 sm:p-6 group border-slate-200/80 dark:border-slate-800/80">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Orders This Month</span>
+                    <div class="w-11 h-11 rounded-2xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shadow-2xs group-hover:scale-110 transition-transform">
+                        <Calendar class="w-5 h-5" />
+                    </div>
+                </div>
+                <div class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mb-1 tracking-tight">
+                    {{ stats?.this_month ?? 0 }}
+                </div>
+                <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Orders registered in current month</p>
+            </AppCard>
+
+            <!-- In Transit Card -->
+            <AppCard no-padding hoverable class="p-5 sm:p-6 group border-slate-200/80 dark:border-slate-800/80">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">In Transit</span>
+                    <div class="w-11 h-11 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shadow-2xs group-hover:scale-110 transition-transform">
+                        <Car class="w-5 h-5" />
+                    </div>
+                </div>
+                <div class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mb-1 tracking-tight">
+                    {{ stats?.in_transit ?? 0 }}
+                </div>
+                <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Active shipments en route</p>
+            </AppCard>
+
+            <!-- Delivered Card -->
+            <AppCard no-padding hoverable class="p-5 sm:p-6 group border-slate-200/80 dark:border-slate-800/80">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Delivered</span>
+                    <div class="w-11 h-11 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shadow-2xs group-hover:scale-110 transition-transform">
+                        <CheckCircle2 class="w-5 h-5" />
+                    </div>
+                </div>
+                <div class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mb-1 tracking-tight">
+                    {{ stats?.delivered ?? 0 }}
+                </div>
+                <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Completed vehicle deliveries</p>
+            </AppCard>
+        </div>
 
         <!-- Search & Filters Bar (Mobile-First Layout) -->
         <AppCard no-padding class="p-4 sm:p-5 shadow-xs border-slate-200/80 dark:border-slate-800/80">

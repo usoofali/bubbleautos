@@ -5,12 +5,15 @@ import AppPageHeader from '@/components/common/AppPageHeader.vue';
 import AppCard from '@/components/common/AppCard.vue';
 import AppBadge from '@/components/common/AppBadge.vue';
 import GlobalVinSearch from '@/components/common/GlobalVinSearch.vue';
-import { Car, CheckCircle2, DollarSign, Mail, Clock, ArrowRight, Activity, AlertCircle } from '@lucide/vue';
+import { Car, CheckCircle2, DollarSign, Mail, Clock, ArrowRight, Activity, AlertCircle, ShoppingBag, FileText, TrendingUp, CreditCard } from '@lucide/vue';
 
 interface Props {
     metrics: {
+        total_orders: number;
         orders_in_transit: number;
         delivered_orders: number;
+        total_invoiced: number;
+        total_paid: number;
         outstanding_invoices_count: number;
         outstanding_invoices_total: number;
         emails_to_review: number;
@@ -65,13 +68,27 @@ const currencySymbol = computed(() => (page.props.currencySymbol as string) || (
             </Link>
         </div>
 
-        <!-- Mobile-First Responsive Metrics Cards Grid -->
+        <!-- Section 1: Operational Metrics Cards Grid -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+            <!-- Total Orders -->
+            <AppCard no-padding hoverable class="p-5 sm:p-6 group border-slate-200/80 dark:border-slate-800/80">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Total Orders</span>
+                    <div class="w-11 h-11 rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shadow-2xs group-hover:scale-110 transition-transform">
+                        <ShoppingBag class="w-5 h-5" />
+                    </div>
+                </div>
+                <div class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mb-1 tracking-tight">
+                    {{ metrics.total_orders }}
+                </div>
+                <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Total registered vehicle orders</p>
+            </AppCard>
+
             <!-- Orders In Transit -->
             <AppCard no-padding hoverable class="p-5 sm:p-6 group border-slate-200/80 dark:border-slate-800/80">
                 <div class="flex items-center justify-between mb-3">
                     <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">In Transit</span>
-                    <div class="w-11 h-11 rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shadow-2xs group-hover:scale-110 transition-transform">
+                    <div class="w-11 h-11 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shadow-2xs group-hover:scale-110 transition-transform">
                         <Car class="w-5 h-5" />
                     </div>
                 </div>
@@ -95,20 +112,6 @@ const currencySymbol = computed(() => (page.props.currencySymbol as string) || (
                 <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Completed order deliveries</p>
             </AppCard>
 
-            <!-- Outstanding Invoices -->
-            <AppCard no-padding hoverable class="p-5 sm:p-6 group border-slate-200/80 dark:border-slate-800/80">
-                <div class="flex items-center justify-between mb-3">
-                    <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Unpaid Balance</span>
-                    <div class="w-11 h-11 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shadow-2xs group-hover:scale-110 transition-transform">
-                        <DollarSign class="w-5 h-5" />
-                    </div>
-                </div>
-                <div class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mb-1 font-mono tracking-tight">
-                    {{ currencySymbol }}{{ metrics.outstanding_invoices_total.toLocaleString('en-US', { minimumFractionDigits: 2 }) }}
-                </div>
-                <p class="text-xs font-medium text-slate-500 dark:text-slate-400">{{ metrics.outstanding_invoices_count }} invoice(s) pending payment</p>
-            </AppCard>
-
             <!-- Emails to Review -->
             <AppCard no-padding hoverable class="p-5 sm:p-6 group border-slate-200/80 dark:border-slate-800/80">
                 <div class="flex items-center justify-between mb-3">
@@ -121,6 +124,51 @@ const currencySymbol = computed(() => (page.props.currencySymbol as string) || (
                     {{ metrics.emails_to_review }}
                 </div>
                 <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Unlinked communications</p>
+            </AppCard>
+        </div>
+
+        <!-- Section 2: Invoicing & Financial Summary Cards Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5">
+            <!-- Total Invoiced Card -->
+            <AppCard no-padding hoverable class="p-5 sm:p-6 group border-slate-200/80 dark:border-slate-800/80">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Total Invoiced</span>
+                    <div class="w-11 h-11 rounded-2xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shadow-2xs group-hover:scale-110 transition-transform">
+                        <FileText class="w-5 h-5" />
+                    </div>
+                </div>
+                <div class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mb-1 font-mono tracking-tight">
+                    {{ currencySymbol }}{{ metrics.total_invoiced.toLocaleString('en-US', { minimumFractionDigits: 2 }) }}
+                </div>
+                <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Total value of generated invoices</p>
+            </AppCard>
+
+            <!-- Total Paid Balance Card -->
+            <AppCard no-padding hoverable class="p-5 sm:p-6 group border-slate-200/80 dark:border-slate-800/80">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Total Paid</span>
+                    <div class="w-11 h-11 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shadow-2xs group-hover:scale-110 transition-transform">
+                        <TrendingUp class="w-5 h-5" />
+                    </div>
+                </div>
+                <div class="text-3xl sm:text-4xl font-black text-emerald-600 dark:text-emerald-400 mb-1 font-mono tracking-tight">
+                    {{ currencySymbol }}{{ metrics.total_paid.toLocaleString('en-US', { minimumFractionDigits: 2 }) }}
+                </div>
+                <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Total payments received to date</p>
+            </AppCard>
+
+            <!-- Outstanding / Unpaid Balance Card -->
+            <AppCard no-padding hoverable class="p-5 sm:p-6 group border-slate-200/80 dark:border-slate-800/80">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Unpaid Balance</span>
+                    <div class="w-11 h-11 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shadow-2xs group-hover:scale-110 transition-transform">
+                        <DollarSign class="w-5 h-5" />
+                    </div>
+                </div>
+                <div class="text-3xl sm:text-4xl font-black text-amber-600 dark:text-amber-400 mb-1 font-mono tracking-tight">
+                    {{ currencySymbol }}{{ metrics.outstanding_invoices_total.toLocaleString('en-US', { minimumFractionDigits: 2 }) }}
+                </div>
+                <p class="text-xs font-medium text-slate-500 dark:text-slate-400">{{ metrics.outstanding_invoices_count }} invoice(s) pending payment</p>
             </AppCard>
         </div>
 

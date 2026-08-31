@@ -56,3 +56,41 @@ test('adding and updating line items recalculates invoice totals and partial pay
     expect((float) $invoice->balance)->toBe(950.0);
     expect($invoice->status->value)->toBe('partially_paid');
 });
+
+test('staff can download styled pdf invoice and payment receipt', function () {
+    $adminRole = Role::create(['name' => 'Administrator', 'slug' => 'admin']);
+    $user = User::factory()->create(['role_id' => $adminRole->id]);
+
+    $customer = Customer::create(['name' => 'PDF Test Customer', 'phone' => '+1 555-2020']);
+    $orderService = new OrderService;
+    $order = $orderService->createOrder([
+        'customer_id' => $customer->id,
+        'vin' => '1FA6P8CF0H5333333',
+        'make' => 'Chevrolet',
+        'model' => 'Tahoe',
+        'year' => 2022,
+    ]);
+
+    $invoiceService = new InvoiceService;
+    $invoice = $order->invoice;
+    $invoiceService->addItem($invoice, ['description' => 'Ocean Freight', 'amount' => 1800]);
+
+    // Test invoice PDF download
+    $invoiceResponse = $this->actingAs($user)->get("/orders/{$order->id}/invoice/pdf");
+    $invoiceResponse->assertOk();
+    $invoiceResponse->assertHeader('content-type', 'application/pdf');
+
+    // Record payment
+    $paymentService = new PaymentService;
+    $payment = $paymentService->recordPayment($invoice, [
+        'amount' => 1000.00,
+        'payment_date' => now()->toDateString(),
+        'method' => 'bank_transfer',
+        'reference' => 'TXN-PDF-01',
+    ]);
+
+    // Test receipt PDF download
+    $receiptResponse = $this->actingAs($user)->get("/invoices/payments/{$payment->id}/pdf");
+    $receiptResponse->assertOk();
+    $receiptResponse->assertHeader('content-type', 'application/pdf');
+});

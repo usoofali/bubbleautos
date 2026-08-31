@@ -16,7 +16,7 @@
 
         .header-table {
             width: 100%;
-            border-bottom: 2px solid #e2e8f0;
+            border-bottom: 3px solid #059669;
             padding-bottom: 20px;
             margin-bottom: 25px;
         }
@@ -28,22 +28,22 @@
         }
 
         .company-title {
-            font-size: 16px;
-            font-weight: bold;
-            color: #0f172a;
+            font-size: 18px;
+            font-weight: 800;
+            color: #047857;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
         .company-details {
             font-size: 11px;
-            color: #64748b;
+            color: #475569;
         }
 
         .receipt-title {
-            font-size: 20px;
+            font-size: 24px;
             font-weight: 900;
-            color: #059669;
+            color: #047857;
             text-align: right;
             margin: 0;
             text-transform: uppercase;
@@ -53,56 +53,65 @@
         .receipt-subtitle {
             font-size: 12px;
             font-weight: bold;
-            color: #64748b;
+            color: #059669;
             text-align: right;
             font-family: monospace;
+            margin-top: 3px;
         }
 
         .amount-box {
             background-color: #ecfdf5;
-            border: 1px solid #a7f3d0;
-            border-radius: 10px;
-            padding: 15px;
+            border: 2px solid #34d399;
+            border-radius: 12px;
+            padding: 18px;
             text-align: center;
             margin-bottom: 25px;
         }
 
         .amount-label {
             font-size: 11px;
-            font-weight: bold;
+            font-weight: 900;
             color: #047857;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 1px;
         }
 
         .amount-value {
-            font-size: 32px;
+            font-size: 36px;
             font-weight: 900;
-            color: #059669;
+            color: #047857;
             font-family: monospace;
             margin-top: 5px;
         }
 
         .grid-table {
             width: 100%;
-            border: 1px solid #e2e8f0;
+            border: 1px solid #a7f3d0;
             border-collapse: collapse;
             margin-bottom: 25px;
             border-radius: 8px;
+            overflow: hidden;
         }
 
         .grid-table td {
             padding: 12px 15px;
-            border-bottom: 1px solid #e2e8f0;
+            border-bottom: 1px solid #d1fae5;
+            border-right: 1px solid #d1fae5;
             width: 50%;
+            background-color: #ffffff;
+        }
+
+        .grid-table tr:nth-child(even) td {
+            background-color: #f0fdf4;
         }
 
         .grid-label {
             font-size: 10px;
-            font-weight: bold;
-            color: #94a3b8;
+            font-weight: 800;
+            color: #059669;
             text-transform: uppercase;
             display: block;
+            margin-bottom: 2px;
         }
 
         .grid-val {
@@ -113,10 +122,10 @@
 
         .footer-table {
             width: 100%;
-            border-top: 1px solid #e2e8f0;
+            border-top: 2px solid #a7f3d0;
             padding-top: 15px;
             font-size: 11px;
-            color: #64748b;
+            color: #475569;
         }
     </style>
 </head>
@@ -147,7 +156,7 @@
     <!-- Sum Received Banner -->
     <div style="font-size: 13px; margin-bottom: 15px;">
         Received with thanks from <strong
-            style="color: #0f172a;">{{ $order->customer->name ?? 'Valued Customer' }}</strong> the sum of:
+            style="color: #047857; font-size: 14px;">{{ $order->customer->name ?? 'Valued Customer' }}</strong> the sum of:
     </div>
 
     <div class="amount-box">
@@ -172,7 +181,7 @@
         <tr>
             <td colspan="2">
                 <span class="grid-label">For Vehicle Shipment</span>
-                <span class="grid-val" style="font-family: monospace;">
+                <span class="grid-val" style="font-family: monospace; color: #047857;">
                     {{ trim(($order->year ? $order->year . ' ' : '') . ($order->make ?? '') . ' ' . ($order->model ?? '')) }}
                     (VIN: {{ $order->vin }})
                 </span>
@@ -196,7 +205,7 @@
     <table class="footer-table">
         <tr>
             <td style="width: 50%;">
-                Recorded By: <strong>{{ $payment->recorder->name ?? 'Staff' }}</strong>
+                Recorded By: <strong style="color: #0f172a;">{{ $payment->recorder->name ?? 'Staff' }}</strong>
             </td>
             <td style="width: 50%; text-align: right; font-weight: bold; color: #047857;">
                 Thank you for your payment!
